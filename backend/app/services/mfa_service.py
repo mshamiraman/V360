@@ -34,7 +34,7 @@ class MFAService:
             codes.append(f"{code[:4]}-{code[4:]}")
         return codes
     
-    def setup_mfa(self, user: User, app_name: str = "VulnPatch AI") -> Tuple[str, str, List[str]]:
+    def setup_mfa(self, user: User, app_name: str = "Aman V360") -> Tuple[str, str, List[str]]:
         """
         Setup MFA for a user
         Returns: (secret_key, qr_code_url, backup_codes)

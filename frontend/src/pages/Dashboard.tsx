@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
               </Box>
               
               <ResponsiveContainer width="100%" height={350}>
-                <AreaChart data={trends?.vulnerability_trends || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={trends?.vulnerability_trends || []} margin={{ top: 10, right: 20, left: -20, bottom: 40 }}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.2}/>
@@ -258,9 +258,10 @@ const Dashboard: React.FC = () => {
                     tick={{ fill: '#94A3B8', fontSize: 13, fontWeight: 500 }}
                     tickFormatter={(date) => {
                       const d = new Date(date);
-                      return d.toLocaleDateString('en-US', { month: 'short' });
+                      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     }}
-                    dy={15}
+                    interval={5}
+                    dy={10}
                   />
                   <YAxis 
                     axisLine={false} 

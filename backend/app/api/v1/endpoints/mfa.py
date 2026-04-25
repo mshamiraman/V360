@@ -86,7 +86,7 @@ async def get_qr_code_image(
         totp = pyotp.TOTP(current_user.mfa_secret)
         qr_url = totp.provisioning_uri(
             name=current_user.email,
-            issuer_name="VulnPatch AI"
+            issuer_name="Aman V360"
         )
         
         # Generate QR code image
@@ -126,7 +126,7 @@ async def get_qr_code_base64(
         totp = pyotp.TOTP(current_user.mfa_secret)
         qr_url = totp.provisioning_uri(
             name=current_user.email,
-            issuer_name="VulnPatch AI"
+            issuer_name="Aman V360"
         )
         
         # Generate QR code image

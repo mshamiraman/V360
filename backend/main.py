@@ -1,5 +1,5 @@
 """
-VulnPatch AI - Main FastAPI Application
+Aman V360 - Main FastAPI Application
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +15,7 @@ from app.core.database import engine, Base
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("Starting VulnPatch AI...")
+    print("Starting Aman V360...")
     
     # Initialize AI learning service with feedback integration
     try:
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
-    print("Shutting down VulnPatch AI...")
+    print("Shutting down Aman V360...")
     
     # Cleanup AI services
     try:
@@ -52,9 +52,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="VulnPatch AI",
-    description="Intelligent Vulnerability Patch Management System",
-    version="1.0.0",
+    title="Aman V360",
+    description="Advanced Vulnerability Scanner & Management System",
+    version="3.0.0",
     lifespan=lifespan
 )
 
@@ -75,8 +75,8 @@ app.include_router(api_router, prefix="/api/v1")
 async def root():
     """Root endpoint"""
     return {
-        "message": "VulnPatch AI - Intelligent Vulnerability Patch Management System",
-        "version": "1.0.0",
+        "message": "Aman V360 - Advanced Vulnerability Scanner & Management System",
+        "version": "3.0.0",
         "status": "running"
     }
 

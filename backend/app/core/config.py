@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     """Application settings"""
     
     # App settings
-    APP_NAME: str = "VulnPatch AI"
-    VERSION: str = "1.0.0"
+    APP_NAME: str = "Aman V360"
+    VERSION: str = "3.0.0"
     DEBUG: bool = False
     
     # Database

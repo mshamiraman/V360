@@ -1,5 +1,5 @@
 """
-PDF Report Generator for VulnPatch AI
+PDF Report Generator for Aman V360
 """
 import base64
 from io import BytesIO
@@ -185,7 +185,7 @@ class PDFReportGenerator:
         story = []
 
         # Main title
-        story.append(Paragraph("VulnPatch AI", self.styles['CustomTitle']))
+        story.append(Paragraph("Aman V360", self.styles['CustomTitle']))
         story.append(Spacer(1, 12))
 
         # Subtitle

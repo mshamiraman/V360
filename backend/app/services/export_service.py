@@ -325,7 +325,7 @@ class ExportService:
             writer = csv.writer(output)
             
             # Dashboard Summary Section
-            writer.writerow(['VulnPatch AI - Dashboard Summary'])
+            writer.writerow(['Aman V360 - Dashboard Summary'])
             writer.writerow(['Generated At', datetime.utcnow().isoformat()])
             writer.writerow(['User ID', user_id])
             writer.writerow([])  # Empty row
@@ -442,7 +442,7 @@ class ExportService:
             writer = csv.writer(output)
             
             # Write headers
-            writer.writerow(['VulnPatch AI - Vulnerability Trends'])
+            writer.writerow(['Aman V360 - Vulnerability Trends'])
             writer.writerow(['Period', f'Last {days} days'])
             writer.writerow(['Generated At', datetime.utcnow().isoformat()])
             writer.writerow([])

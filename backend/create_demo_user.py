@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Script to create demo user for VulnPatch AI
+Script to create demo user for Aman V360
 """
 import sys
 import time
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError
-from sqlalchemy import text
+from sqlalchemy import text, update
 from app.core.database import SessionLocal
+from app.models.user import User
 from app.services.auth_service import AuthService
 from app.schemas.auth import UserCreate
 
@@ -43,12 +44,8 @@ def create_demo_user():
         existing_user = auth_service.get_user_by_email(email)
         if existing_user:
             print(f"INFO: User {email} already exists. Updating password...")
-            # Use the auth service or directly update via DB
-            from app.core.security import get_password_hash
-            from sqlalchemy import update
-            from app.models.user import User
-            
-            hashed_password = get_password_hash(password)
+            # Use the existing auth_service to hash the password
+            hashed_password = auth_service.get_password_hash(password)
             db.execute(
                 update(User).where(User.email == email).values(hashed_password=hashed_password)
             )

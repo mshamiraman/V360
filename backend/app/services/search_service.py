@@ -1,5 +1,5 @@
 """
-Advanced search and filtering service for VulnPatch AI
+Advanced search and filtering service for Aman V360
 """
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc, func, case, String

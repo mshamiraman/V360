@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting VulnPatch AI Backend..."
+echo "Starting Aman V360 Backend..."
 
 # Wait for database to be ready
 echo "Waiting for database to be ready..."
