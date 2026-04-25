@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Set a dummy user for now - in production you'd validate the token
         setUser({
           id: 1,
-          email: 'demo@vulnpatch.ai',
+          email: 'demo@amanv360.ai',
           full_name: 'Demo User',
           role: 'user',
           is_active: true,
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser({
         id: 1,
         email: data.email,
-        full_name: data.email === 'demo@vulnpatch.ai' ? 'Demo User' : 'User',
+        full_name: data.email === 'demo@amanv360.ai' ? 'Demo User' : 'User',
         role: 'user',
         is_active: true,
         created_at: new Date().toISOString(),

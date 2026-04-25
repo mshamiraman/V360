@@ -2,21 +2,36 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
-  Paper,
   Typography,
   Card,
   CardContent,
   CircularProgress,
   Alert,
   Avatar,
+  Chip,
+  IconButton,
 } from '@mui/material';
 import {
   Security,
   Assessment,
   TrendingUp,
   CloudUpload,
+  InfoOutlined,
+  TimelineOutlined,
+  MoreHoriz,
 } from '@mui/icons-material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  PieChart, 
+  Pie, 
+  Cell,
+} from 'recharts';
 import { dashboardAPI } from '../services/api';
 import { DashboardMetrics, TrendData } from '../types';
 
@@ -27,7 +42,15 @@ const StatCard: React.FC<{
   color: string;
   subtitle?: string;
 }> = ({ title, value, icon, color, subtitle }) => (
-  <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+  <Card sx={{ 
+    position: 'relative', 
+    overflow: 'hidden',
+    borderRadius: 4,
+    border: '1px solid',
+    borderColor: 'divider',
+    boxShadow: 'none',
+    bgcolor: 'background.paper'
+  }}>
     <Box sx={{ 
       position: 'absolute', 
       top: -20, 
@@ -35,37 +58,82 @@ const StatCard: React.FC<{
       width: 100, 
       height: 100, 
       borderRadius: '50%', 
-      bgcolor: `${color}15`,
+      bgcolor: `${color}10`,
       zIndex: 0
     }} />
     <CardContent sx={{ position: 'relative', zIndex: 1 }}>
       <Box display="flex" justifyContent="space-between" alignItems="flex-start">
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1, mb: 1, display: 'block' }}>
             {title}
           </Typography>
-          <Typography variant="h3" sx={{ fontWeight: 700, fontFamily: '"Outfit", sans-serif' }}>
+          <Typography variant="h3" sx={{ fontWeight: 900, fontFamily: '"Outfit", sans-serif', letterSpacing: '-1px' }}>
             {value}
           </Typography>
           {subtitle && (
-            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, mt: 1, display: 'block' }}>
-              {subtitle}
-            </Typography>
+            <Box display="flex" alignItems="center" gap={0.5} mt={1}>
+              <Typography variant="caption" sx={{ color: color, fontWeight: 700 }}>
+                {subtitle}
+              </Typography>
+            </Box>
           )}
         </Box>
-        <Avatar sx={{ 
-          bgcolor: `${color}20`, 
+        <Box sx={{ 
+          bgcolor: `${color}15`, 
           color: color, 
-          width: 48, 
-          height: 48,
-          borderRadius: 2.5
+          width: 44, 
+          height: 44,
+          borderRadius: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '1px solid',
+          borderColor: `${color}30`
         }}>
           {icon}
-        </Avatar>
+        </Box>
       </Box>
     </CardContent>
   </Card>
 );
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box sx={{ position: 'relative' }}>
+        <Box sx={{ 
+          bgcolor: '#111827', 
+          px: 2,
+          py: 1.5,
+          borderRadius: '12px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+          textAlign: 'center',
+          minWidth: 100,
+          '&:after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: '8px solid #111827',
+          }
+        }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)', fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.75rem' }}>
+            {new Date(label).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+          </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: '#fff', fontSize: '1.25rem' }}>
+            {payload[0].value}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+  return null;
+};
 
 const Dashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -95,24 +163,24 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress thickness={5} size={60} />
+        <CircularProgress thickness={5} size={50} sx={{ color: 'primary.main' }} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
+      <Alert severity="error" sx={{ mt: 2, borderRadius: 3 }}>
         {error}
       </Alert>
     );
   }
 
   const severityColors = {
-    Critical: '#EF4444',
-    High: '#F59E0B',
-    Medium: '#10B981',
-    Low: '#6366F1',
+    Critical: '#F43F5E',
+    High: '#FB923C',
+    Medium: '#FBBF24',
+    Low: '#38BDF8',
   };
 
   const pieData = metrics ? [
@@ -123,162 +191,191 @@ const Dashboard: React.FC = () => {
   ].filter(item => item.value > 0) : [];
 
   return (
-    <Box sx={{ py: 2 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+    <Box sx={{ py: 1 }}>
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <Box>
-          <Typography variant="h3" sx={{ fontWeight: 800, mb: 1, fontFamily: '"Outfit", sans-serif' }}>
-            System Health
+          <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, fontFamily: '"Outfit", sans-serif', letterSpacing: '-1.5px' }}>
+            Aman V360 Intelligence
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Overview of your security posture and vulnerability trends.
+          <Typography variant="body1" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            Real-time security orchestration and vulnerability life-cycle monitoring.
+            <Chip label="LIVE" size="small" color="success" sx={{ height: 20, fontSize: '0.6rem', fontWeight: 900, borderRadius: 1 }} />
           </Typography>
         </Box>
       </Box>
 
-      {/* Metrics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      {/* Metrics Grid */}
+      <Grid container spacing={3} sx={{ mb: 5 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Total Scans" 
-            value={metrics?.total_scans || 0} 
-            icon={<CloudUpload />} 
-            color="#6366F1"
-            subtitle="+2 this week"
-          />
+          <StatCard title="Total Audits" value={metrics?.total_scans || 0} icon={<CloudUpload />} color="#6366F1" subtitle="Active Infrastructures" />
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Total Vulnerabilities" 
-            value={metrics?.vulnerabilities.total || 0} 
-            icon={<Security />} 
-            color="#EF4444"
-            subtitle="Requires Review"
-          />
+          <StatCard title="Security Findings" value={metrics?.vulnerabilities.total || 0} icon={<Security />} color="#F43F5E" subtitle="Pending Triage" />
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Patch Rate" 
-            value={`${metrics?.patch_completion_rate.toFixed(1) || 0}%`} 
-            icon={<Assessment />} 
-            color="#10B981"
-            subtitle="Above target"
-          />
+          <StatCard title="Remediation Velocity" value={`${metrics?.patch_completion_rate.toFixed(0) || 0}%`} icon={<Assessment />} color="#10B981" subtitle="Efficiency Metric" />
         </Grid>
-
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title="Avg CVSS Score" 
-            value={metrics?.avg_cvss_score || 0} 
-            icon={<TrendingUp />} 
-            color="#F59E0B"
-            subtitle="Moderately Secure"
-          />
+          <StatCard title="Threat Surface" value={metrics?.avg_cvss_score || 0} icon={<TrendingUp />} color="#F59E0B" subtitle="Aggregate Risk Score" />
         </Grid>
       </Grid>
 
-      {/* Charts */}
-      <Grid container spacing={3}>
+      <Grid container spacing={4}>
+        {/* Modern Area Chart for Trends */}
         <Grid item xs={12} md={8}>
-          <Card sx={{ p: 1 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>
-                Security Trends (30D)
-              </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <LineChart data={trends?.vulnerability_trends || []}>
+          <Card sx={{ borderRadius: 6, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', boxShadow: 'none' }}>
+            <CardContent sx={{ p: 4 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Box sx={{ 
+                    width: 40, height: 40, borderRadius: '12px', bgcolor: 'rgba(20, 184, 166, 0.1)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center' 
+                  }}>
+                    <TimelineOutlined sx={{ color: '#14B8A6' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>
+                    Risk Trajectory (30D)
+                  </Typography>
+                </Box>
+                <IconButton size="small">
+                  <MoreHoriz />
+                </IconButton>
+              </Box>
+              
+              <ResponsiveContainer width="100%" height={350}>
+                <AreaChart data={trends?.vulnerability_trends || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#14B8A6" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#14B8A6" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
+                  <CartesianGrid vertical={false} stroke="rgba(0,0,0,0.05)" />
                   <XAxis 
                     dataKey="date" 
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#64748B', fontSize: 12 }}
+                    tick={{ fill: '#94A3B8', fontSize: 13, fontWeight: 500 }}
                     tickFormatter={(date) => {
                       const d = new Date(date);
-                      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      return d.toLocaleDateString('en-US', { month: 'short' });
                     }}
+                    dy={15}
                   />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#94A3B8', fontSize: 13, fontWeight: 500 }}
+                  />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                    labelFormatter={(date) => {
-                      const d = new Date(date);
-                      return d.toLocaleDateString('en-US', { 
-                        weekday: 'short', month: 'short', day: 'numeric'
-                      });
-                    }}
+                    content={<CustomTooltip />} 
+                    cursor={{ stroke: '#14B8A6', strokeWidth: 2, strokeDasharray: '5 5' }}
                   />
-                  <Line 
+                  <Area 
                     type="monotone" 
                     dataKey="value" 
-                    stroke="#6366F1" 
-                    strokeWidth={4} 
-                    dot={{ r: 4, fill: '#6366F1', strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 6, strokeWidth: 0 }}
+                    stroke="#14B8A6" 
+                    strokeWidth={3} 
+                    fillOpacity={1} 
+                    fill="url(#colorValue)" 
+                    activeDot={{ 
+                      r: 8, 
+                      fill: '#fff', 
+                      stroke: '#14B8A6', 
+                      strokeWidth: 3,
+                    }}
+                    animationDuration={2000}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </Grid>
 
+        {/* Modern Donut Chart for Severity */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 1 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>
-                Severity Breakdown
+          <Card sx={{ borderRadius: 5, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', boxShadow: 'none', height: '100%' }}>
+            <CardContent sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 4, fontFamily: '"Outfit", sans-serif' }}>
+                Severity Distribution
               </Typography>
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={8}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                </PieChart>
-              </ResponsiveContainer>
+              
+              <Box sx={{ flexGrow: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={85}
+                      outerRadius={115}
+                      paddingAngle={5}
+                      dataKey="value"
+                      stroke="none"
+                      animationDuration={1500}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', fontWeight: 700 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                <Box sx={{ position: 'absolute', textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ fontWeight: 900, fontFamily: '"Outfit", sans-serif', color: 'text.primary', lineHeight: 1 }}>
+                    {metrics?.vulnerabilities.total || 0}
+                  </Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 1 }}>
+                    Total Findings
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ mt: 4, display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
+                {pieData.map((item) => (
+                  <Box key={item.name} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: item.color }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                      {item.name} ({item.value})
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Critical Vulnerabilities Alert */}
+      {/* Critical Alert with Rich Design */}
       {metrics && metrics.vulnerabilities.critical > 0 && (
-        <Alert 
-          severity="error" 
-          variant="filled"
-          sx={{ 
-            mt: 4, 
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
-            boxShadow: '0 8px 16px rgba(239, 68, 68, 0.3)'
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-              Critical Security Warning
-            </Typography>
-            <Typography variant="body2">
-              Our scanners have identified {metrics.vulnerabilities.critical} critical vulnerabilities that require immediate patching. 
-              Review the detailed analysis in the Vulnerabilities section.
-            </Typography>
-          </Box>
-        </Alert>
+        <Card sx={{ 
+          mt: 5, 
+          borderRadius: 4, 
+          border: '1px solid', 
+          borderColor: 'error.main', 
+          bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(244, 63, 94, 0.05)' : 'rgba(244, 63, 94, 0.02)',
+          boxShadow: 'none'
+        }}>
+          <CardContent sx={{ py: 3, px: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Box sx={{ 
+              width: 56, height: 56, borderRadius: '50%', bgcolor: 'error.main', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 20px rgba(244, 63, 94, 0.4)'
+            }}>
+              <InfoOutlined sx={{ color: 'white', fontSize: 32 }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 900, color: 'error.main', mb: 0.5 }}>
+                Critical Threat Vectors Identified
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Aman Intelligence detected **{metrics.vulnerabilities.critical}** high-risk vulnerabilities requiring immediate containment. 
+                Deploy remediation orchestration from the Vulnerabilities dashboard.
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       )}
     </Box>
   );

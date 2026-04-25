@@ -120,7 +120,7 @@ const Login: React.FC = () => {
               <Security sx={{ color: 'white', fontSize: 32 }} />
             </Box>
             <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 1 }}>
-              VulnPatch AI
+              Aman V360
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
               ENTERPRISE SECURITY CONSOLE
@@ -218,7 +218,7 @@ const Login: React.FC = () => {
               Quick Demo Access
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-              Email: <Box component="span" sx={{ color: 'primary.main' }}>demo@vulnpatch.ai</Box>
+              Email: <Box component="span" sx={{ color: 'primary.main' }}>demo@amanv360.ai</Box>
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
               Password: <Box component="span" sx={{ color: 'primary.main' }}>demo123</Box>
@@ -226,7 +226,7 @@ const Login: React.FC = () => {
           </Box>
         </Paper>
         <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 4, fontWeight: 500 }}>
-          © 2026 VulnPatch AI. Advanced Security Analytics Platform.
+          © 2026 Aman V360. Advanced Security Analytics Platform.
         </Typography>
       </Container>
     </Box>

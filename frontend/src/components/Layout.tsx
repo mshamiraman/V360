@@ -98,7 +98,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          VulnPatch AI
+          Aman V360
         </Typography>
       </Box>
       <List sx={{ px: 2, flexGrow: 1 }}>

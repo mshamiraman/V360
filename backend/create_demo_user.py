@@ -37,15 +37,29 @@ def create_demo_user():
     
     try:
         # Check if demo user already exists
-        existing_user = auth_service.get_user_by_email("demo@vulnpatch.ai")
+        email = "demo@amanv360.ai"
+        password = "demo123"
+        
+        existing_user = auth_service.get_user_by_email(email)
         if existing_user:
-            print("SUCCESS: Demo user already exists!")
+            print(f"INFO: User {email} already exists. Updating password...")
+            # Use the auth service or directly update via DB
+            from app.core.security import get_password_hash
+            from sqlalchemy import update
+            from app.models.user import User
+            
+            hashed_password = get_password_hash(password)
+            db.execute(
+                update(User).where(User.email == email).values(hashed_password=hashed_password)
+            )
+            db.commit()
+            print(f"SUCCESS: Password updated for {email}!")
             return
         
         # Create demo user
         user_data = UserCreate(
-            email="demo@vulnpatch.ai",
-            password="demo123",
+            email=email,
+            password=password,
             full_name="Demo User",
             role="admin"
         )
@@ -54,7 +68,7 @@ def create_demo_user():
         print(f"SUCCESS: Demo user created successfully!")
         print(f"   Email: {user.email}")
         print(f"   Role: {user.role}")
-        print(f"   Password: demo123")
+        print(f"   Password: {password}")
         
     except Exception as e:
         print(f"ERROR: Error creating demo user: {e}")
