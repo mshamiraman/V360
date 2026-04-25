@@ -8,6 +8,7 @@ import {
   CardContent,
   CircularProgress,
   Alert,
+  Avatar,
 } from '@mui/material';
 import {
   Security,
@@ -18,6 +19,53 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { dashboardAPI } from '../services/api';
 import { DashboardMetrics, TrendData } from '../types';
+
+const StatCard: React.FC<{ 
+  title: string; 
+  value: string | number; 
+  icon: React.ReactNode; 
+  color: string;
+  subtitle?: string;
+}> = ({ title, value, icon, color, subtitle }) => (
+  <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+    <Box sx={{ 
+      position: 'absolute', 
+      top: -20, 
+      right: -20, 
+      width: 100, 
+      height: 100, 
+      borderRadius: '50%', 
+      bgcolor: `${color}15`,
+      zIndex: 0
+    }} />
+    <CardContent sx={{ position: 'relative', zIndex: 1 }}>
+      <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+        <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, mb: 0.5 }}>
+            {title}
+          </Typography>
+          <Typography variant="h3" sx={{ fontWeight: 700, fontFamily: '"Outfit", sans-serif' }}>
+            {value}
+          </Typography>
+          {subtitle && (
+            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, mt: 1, display: 'block' }}>
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+        <Avatar sx={{ 
+          bgcolor: `${color}20`, 
+          color: color, 
+          width: 48, 
+          height: 48,
+          borderRadius: 2.5
+        }}>
+          {icon}
+        </Avatar>
+      </Box>
+    </CardContent>
+  </Card>
+);
 
 const Dashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
@@ -47,24 +95,24 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+        <CircularProgress thickness={5} size={60} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mt: 2 }}>
+      <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
         {error}
       </Alert>
     );
   }
 
   const severityColors = {
-    Critical: '#d32f2f',
-    High: '#f57c00',
-    Medium: '#fbc02d',
-    Low: '#388e3c',
+    Critical: '#EF4444',
+    High: '#F59E0B',
+    Medium: '#10B981',
+    Low: '#6366F1',
   };
 
   const pieData = metrics ? [
@@ -75,158 +123,161 @@ const Dashboard: React.FC = () => {
   ].filter(item => item.value > 0) : [];
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Security Dashboard
-      </Typography>
+    <Box sx={{ py: 2 }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <Box>
+          <Typography variant="h3" sx={{ fontWeight: 800, mb: 1, fontFamily: '"Outfit", sans-serif' }}>
+            System Health
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Overview of your security posture and vulnerability trends.
+          </Typography>
+        </Box>
+      </Box>
 
       {/* Metrics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <CloudUpload color="primary" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Scans
-                  </Typography>
-                  <Typography variant="h4">
-                    {metrics?.total_scans || 0}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <StatCard 
+            title="Total Scans" 
+            value={metrics?.total_scans || 0} 
+            icon={<CloudUpload />} 
+            color="#6366F1"
+            subtitle="+2 this week"
+          />
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Security color="error" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Vulnerabilities
-                  </Typography>
-                  <Typography variant="h4">
-                    {metrics?.vulnerabilities.total || 0}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <StatCard 
+            title="Total Vulnerabilities" 
+            value={metrics?.vulnerabilities.total || 0} 
+            icon={<Security />} 
+            color="#EF4444"
+            subtitle="Requires Review"
+          />
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <Assessment color="success" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Patch Completion
-                  </Typography>
-                  <Typography variant="h4">
-                    {metrics?.patch_completion_rate.toFixed(1) || 0}%
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <StatCard 
+            title="Patch Rate" 
+            value={`${metrics?.patch_completion_rate.toFixed(1) || 0}%`} 
+            icon={<Assessment />} 
+            color="#10B981"
+            subtitle="Above target"
+          />
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center">
-                <TrendingUp color="warning" sx={{ mr: 2 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Avg CVSS Score
-                  </Typography>
-                  <Typography variant="h4">
-                    {metrics?.avg_cvss_score || 0}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <StatCard 
+            title="Avg CVSS Score" 
+            value={metrics?.avg_cvss_score || 0} 
+            icon={<TrendingUp />} 
+            color="#F59E0B"
+            subtitle="Moderately Secure"
+          />
         </Grid>
       </Grid>
 
       {/* Charts */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Vulnerability Trends (Last 30 Days)
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trends?.vulnerability_trends || []}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tickFormatter={(date) => {
-                    const d = new Date(date);
-                    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                  }}
-                />
-                <YAxis />
-                <Tooltip 
-                  labelFormatter={(date) => {
-                    const d = new Date(date);
-                    return d.toLocaleDateString('en-US', { 
-                      weekday: 'short', 
-                      month: 'short', 
-                      day: 'numeric',
-                      year: 'numeric'
-                    });
-                  }}
-                />
-                <Line type="monotone" dataKey="value" stroke="#1976d2" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </Paper>
+          <Card sx={{ p: 1 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>
+                Security Trends (30D)
+              </Typography>
+              <ResponsiveContainer width="100%" height={320}>
+                <LineChart data={trends?.vulnerability_trends || []}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748B', fontSize: 12 }}
+                    tickFormatter={(date) => {
+                      const d = new Date(date);
+                      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }}
+                  />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    labelFormatter={(date) => {
+                      const d = new Date(date);
+                      return d.toLocaleDateString('en-US', { 
+                        weekday: 'short', month: 'short', day: 'numeric'
+                      });
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#6366F1" 
+                    strokeWidth={4} 
+                    dot={{ r: 4, fill: '#6366F1', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Severity Distribution
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Paper>
+          <Card sx={{ p: 1 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>
+                Severity Breakdown
+              </Typography>
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={8}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 
       {/* Critical Vulnerabilities Alert */}
       {metrics && metrics.vulnerabilities.critical > 0 && (
-        <Alert severity="error" sx={{ mt: 3 }}>
-          <Typography variant="h6">
-            ⚠️ {metrics.vulnerabilities.critical} Critical Vulnerabilities Detected
-          </Typography>
-          <Typography>
-            Immediate action required! Please review and patch critical vulnerabilities as soon as possible.
-          </Typography>
+        <Alert 
+          severity="error" 
+          variant="filled"
+          sx={{ 
+            mt: 4, 
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)',
+            boxShadow: '0 8px 16px rgba(239, 68, 68, 0.3)'
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+              Critical Security Warning
+            </Typography>
+            <Typography variant="body2">
+              Our scanners have identified {metrics.vulnerabilities.critical} critical vulnerabilities that require immediate patching. 
+              Review the detailed analysis in the Vulnerabilities section.
+            </Typography>
+          </Box>
         </Alert>
       )}
     </Box>

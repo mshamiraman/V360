@@ -23,6 +23,8 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
+  Grid,
+  Avatar,
 } from '@mui/material';
 import {
   Send,
@@ -373,117 +375,108 @@ const AIAssistant: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4" gutterBottom>
-          AI Security Assistant
-        </Typography>
+    <Box sx={{ height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 0.5 }}>
+            AI Security Assistant
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Intelligent analysis of your security posture and remediation steps.
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={createNewConversation}
+          sx={{ borderRadius: 3, px: 3 }}
         >
           New Chat
         </Button>
       </Box>
 
-      <Box display="flex" gap={3} height="calc(100vh - 200px)">
+      <Grid container spacing={3} sx={{ flexGrow: 1, minHeight: 0 }}>
         {/* Conversation History Sidebar */}
-        <Card sx={{ width: 280, display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ flex: 1, p: 2 }}>
-            <Typography variant="h6" gutterBottom display="flex" alignItems="center">
-              <History sx={{ mr: 1 }} />
-              Conversation History
-            </Typography>
+        <Grid item xs={12} md={3} sx={{ height: '100%', display: { xs: 'none', md: 'block' } }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', bgcolor: 'background.paper' }}>
+            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <History fontSize="small" color="primary" />
+                History
+              </Typography>
+            </Box>
             
-            {loadingConversations ? (
-              <Box display="flex" justifyContent="center" p={2}>
-                <CircularProgress size={24} />
-              </Box>
-            ) : (
-              <List dense sx={{ maxHeight: 'calc(100vh - 350px)', overflowY: 'auto' }}>
-                {conversations.map((conversation) => (
-                  <ListItem
-                    key={conversation.conversation_id}
-                    disablePadding
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        size="small"
-                        onClick={(e) => handleMenuOpen(e, conversation.conversation_id)}
-                      >
-                        <MoreVert fontSize="small" />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemButton
-                      selected={currentConversationId === conversation.conversation_id}
-                      onClick={() => handleConversationSelect(conversation.conversation_id)}
-                      sx={{ pr: 6 }}
+            <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 1 }}>
+              {loadingConversations ? (
+                <Box display="flex" justifyContent="center" p={4}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : (
+                <List dense>
+                  {conversations.map((conversation) => (
+                    <ListItem
+                      key={conversation.conversation_id}
+                      disablePadding
+                      sx={{ mb: 0.5 }}
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, conversation.conversation_id)}
+                        >
+                          <MoreVert fontSize="small" />
+                        </IconButton>
+                      }
                     >
-                      <ListItemText
-                        primary={
-                          editingTitle === conversation.conversation_id ? (
-                            <TextField
-                              size="small"
-                              value={newTitle}
-                              onChange={(e) => setNewTitle(e.target.value)}
-                              onBlur={() => handleEditTitle(conversation.conversation_id, newTitle)}
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleEditTitle(conversation.conversation_id, newTitle);
-                                }
-                              }}
-                              autoFocus
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          ) : (
-                            conversation.title || 'Untitled Conversation'
-                          )
-                        }
-                        secondary={`${conversation.message_count} messages • ${new Date(conversation.last_activity_at).toLocaleDateString()}`}
-                        primaryTypographyProps={{
-                          variant: 'body2',
-                          sx: {
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
+                      <ListItemButton
+                        selected={currentConversationId === conversation.conversation_id}
+                        onClick={() => handleConversationSelect(conversation.conversation_id)}
+                        sx={{ 
+                          borderRadius: 2,
+                          '&.Mui-selected': {
+                            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(99, 102, 241, 0.08)',
                           }
                         }}
-                        secondaryTypographyProps={{
-                          variant: 'caption',
-                          color: 'textSecondary'
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-                
-                {conversations.length === 0 && (
-                  <ListItem>
-                    <ListItemText
-                      primary="No conversations yet"
-                      secondary="Start a new chat to begin"
-                      primaryTypographyProps={{ variant: 'body2', color: 'textSecondary' }}
-                      secondaryTypographyProps={{ variant: 'caption' }}
-                    />
-                  </ListItem>
-                )}
-              </List>
-            )}
-          </CardContent>
-        </Card>
+                      >
+                        <ListItemText
+                          primary={conversation.title || 'Untitled Chat'}
+                          secondary={new Date(conversation.last_activity_at).toLocaleDateString()}
+                          primaryTypographyProps={{
+                            variant: 'body2',
+                            fontWeight: currentConversationId === conversation.conversation_id ? 700 : 500,
+                            noWrap: true
+                          }}
+                          secondaryTypographyProps={{ variant: 'caption' }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
+          </Card>
+        </Grid>
 
         {/* Chat Area */}
-        <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* Messages */}
+        <Grid item xs={12} md={6} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Card sx={{ 
+            flexGrow: 1, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            minHeight: 0,
+            boxShadow: 'none',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'transparent'
+          }}>
             <Box
               sx={{
-                flex: 1,
+                flexGrow: 1,
                 overflowY: 'auto',
-                mb: 2,
-                maxHeight: 'calc(100vh - 350px)',
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2
               }}
             >
               {messages.map((message) => (
@@ -492,203 +485,175 @@ const AIAssistant: React.FC = () => {
                   sx={{
                     display: 'flex',
                     justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
-                    mb: 2,
+                    width: '100%'
                   }}
                 >
-                  <Paper
-                    elevation={1}
-                    sx={{
-                      p: 2,
-                      maxWidth: '70%',
-                      backgroundColor: message.type === 'user' ? 'primary.main' : 'grey.100',
+                  <Box sx={{ maxWidth: '85%' }}>
+                    <Box sx={{ 
+                      p: 2, 
+                      borderRadius: message.type === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                      background: message.type === 'user' 
+                        ? 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)' 
+                        : (theme) => theme.palette.mode === 'dark' ? '#1E293B' : '#F1F5F9',
                       color: message.type === 'user' ? 'white' : 'text.primary',
-                    }}
-                  >
-                    <Box display="flex" alignItems="center" mb={1}>
-                      {message.type === 'ai' ? (
-                        <SmartToy sx={{ mr: 1, fontSize: 20 }} />
-                      ) : (
-                        <Person sx={{ mr: 1, fontSize: 20 }} />
-                      )}
-                      <Typography variant="caption">
-                        {message.type === 'ai' ? 'AI Assistant' : 'You'}
-                      </Typography>
-                    </Box>
-<Box component="div">
-                      {message.type === 'ai' ? formatAIResponse(message.content) : (
-                        <Typography variant="body1">
-                          {message.content}
+                      boxShadow: message.type === 'user' ? '0 4px 12px rgba(99, 102, 241, 0.2)' : 'none'
+                    }}>
+                      <Box display="flex" alignItems="center" mb={1} sx={{ opacity: 0.8 }}>
+                        {message.type === 'ai' ? <SmartToy sx={{ mr: 1, fontSize: 16 }} /> : <Person sx={{ mr: 1, fontSize: 16 }} />}
+                        <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                          {message.type === 'ai' ? 'Assistant' : 'Analyst'}
                         </Typography>
-                      )}
+                      </Box>
+                      <Box sx={{ 
+                        '& p': { mb: 1.5 }, 
+                        '& p:last-child': { mb: 0 },
+                        '& strong': { color: message.type === 'user' ? 'white' : 'primary.main' }
+                      }}>
+                        {message.type === 'ai' ? formatAIResponse(message.content) : (
+                          <Typography variant="body1">{message.content}</Typography>
+                        )}
+                      </Box>
                     </Box>
-                    <Typography variant="caption" sx={{ opacity: 0.7, mt: 1, display: 'block' }}>
-                      {message.timestamp.toLocaleTimeString()}
+                    <Typography variant="caption" sx={{ mt: 0.5, px: 1, display: 'block', opacity: 0.5, textAlign: message.type === 'user' ? 'right' : 'left' }}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
-                  </Paper>
+                  </Box>
                 </Box>
               ))}
               
               {loading && (
-                <Box display="flex" justifyContent="flex-start" mb={2}>
-                  <Paper elevation={1} sx={{ p: 2, backgroundColor: 'grey.100' }}>
-                    <Box display="flex" alignItems="center">
-                      <SmartToy sx={{ mr: 1 }} />
-                      <CircularProgress size={20} sx={{ mr: 2 }} />
-                      <Typography>AI is thinking...</Typography>
-                    </Box>
-                  </Paper>
+                <Box display="flex" justifyContent="flex-start">
+                  <Box sx={{ 
+                    p: 2, 
+                    borderRadius: '20px 20px 20px 4px',
+                    bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1E293B' : '#F1F5F9',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    <CircularProgress size={16} thickness={6} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>AI is analyzing security data...</Typography>
+                  </Box>
                 </Box>
               )}
             </Box>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-
-            {/* Input Area */}
-            <Box display="flex" gap={1}>
-              <TextField
-                fullWidth
-                multiline
-                maxRows={3}
-                placeholder="Ask me anything about your vulnerabilities..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                disabled={loading}
-              />
-              <Button
-                variant="contained"
-                onClick={handleSendMessage}
-                disabled={loading || !query.trim()}
-                sx={{ minWidth: 'auto', px: 2 }}
-              >
-                <Send />
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
-
-        {/* Sidebar */}
-        <Card sx={{ width: 300 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Suggested Questions
-            </Typography>
-            <List dense>
-              {suggestedQuestions.map((question, index) => (
-                <ListItem
-                  key={index}
-                  button
-                  onClick={() => handleSuggestedQuestion(question)}
+            <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+              {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 1, 
+                bgcolor: 'background.paper', 
+                p: 1, 
+                borderRadius: 4,
+                border: '1px solid',
+                borderColor: 'divider',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+              }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  maxRows={4}
+                  placeholder="Ask about vulnerabilities, patches, or risk scores..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={loading}
                   sx={{ 
-                    borderRadius: 1,
-                    mb: 1,
-                    '&:hover': {
-                      backgroundColor: 'action.hover',
-                    },
+                    '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                    '& .MuiOutlinedInput-root': { px: 2 }
+                  }}
+                />
+                <IconButton 
+                  color="primary" 
+                  onClick={handleSendMessage}
+                  disabled={loading || !query.trim()}
+                  sx={{ 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    width: 48,
+                    height: 48,
+                    '&:hover': { bgcolor: 'primary.dark' },
+                    '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
                   }}
                 >
-                  <ListItemText
-                    primary={question}
-                    primaryTypographyProps={{ variant: 'body2' }}
-                  />
-                </ListItem>
-              ))}
-            </List>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="h6" gutterBottom>
-              Quick Actions
-            </Typography>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Chip
-                label="Analyze Latest Scan"
-                clickable
-                color="primary"
-                onClick={() => setQuery('Analyze my latest vulnerability scan')}
-              />
-              <Chip
-                label="Security Recommendations"
-                clickable
-                color="secondary"
-                onClick={() => setQuery('What security improvements should I prioritize?')}
-              />
-              <Chip
-                label="Risk Assessment"
-                clickable
-                onClick={() => setQuery('What is my current risk level?')}
-              />
+                  <Send fontSize="small" />
+                </IconButton>
+              </Box>
             </Box>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="body2" color="textSecondary">
-              💡 <strong>Tips:</strong>
-              <br />
-              • Ask specific questions about CVEs
-              <br />
-              • Request patch prioritization
-              <br />
-              • Get explanations in business terms
-              <br />
-              • Ask for remediation steps
+          </Card>
+        </Grid>
+        {/* Suggestions Sidebar */}
+        <Grid item xs={12} md={3} sx={{ height: '100%', display: { xs: 'none', md: 'block' } }}>
+          <Card sx={{ height: '100%', p: 2, bgcolor: 'background.paper' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+              Suggested Queries
             </Typography>
-          </CardContent>
-        </Card>
-      </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {suggestedQuestions.map((question, index) => (
+                <Button
+                  key={index}
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleSuggestedQuestion(question)}
+                  sx={{ 
+                    justifyContent: 'flex-start', 
+                    textAlign: 'left',
+                    borderRadius: 2,
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    fontSize: '0.8rem',
+                    py: 1,
+                    '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.main', color: 'white' }
+                  }}
+                >
+                  {question}
+                </Button>
+              ))}
+            </Box>
+            
+            <Divider sx={{ my: 3 }} />
+            
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+              Quick Insight
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Chip label="Latest Scan" onClick={() => setQuery('Analyze my latest scan')} sx={{ cursor: 'pointer' }} />
+              <Chip label="Critical Fixes" color="error" onClick={() => setQuery('Show critical fixes')} sx={{ cursor: 'pointer' }} />
+              <Chip label="Risk Level" color="warning" onClick={() => setQuery('What is my risk level?')} sx={{ cursor: 'pointer' }} />
+            </Box>
+            
+            <Box sx={{ mt: 'auto', pt: 3 }}>
+              <Alert severity="info" icon={false} sx={{ bgcolor: 'primary.main', color: 'white', borderRadius: 3 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                  💡 PRO TIP:
+                </Typography>
+                <Typography variant="caption" display="block">
+                  Ask for OS-specific patching commands to get copy-pasteable terminal code.
+                </Typography>
+              </Alert>
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
 
-      {/* Conversation Actions Menu */}
+      {/* Menus */}
       <Menu
         anchorEl={menuAnchor?.element}
         open={Boolean(menuAnchor)}
         onClose={handleMenuClose}
+        PaperProps={{ sx: { borderRadius: 2, mt: 1, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } }}
       >
-        <MenuItem
-          onClick={() => {
-            if (menuAnchor) {
-              const conversation = conversations.find(c => c.conversation_id === menuAnchor.conversationId);
-              if (conversation) {
-                setEditingTitle(conversation.conversation_id);
-                setNewTitle(conversation.title || '');
-              }
-            }
-            handleMenuClose();
-          }}
-        >
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
+        <MenuItem onClick={() => { if(menuAnchor) setEditingTitle(menuAnchor.conversationId); handleMenuClose(); }}>
+          <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
           Rename
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (menuAnchor) {
-              handleArchiveConversation(menuAnchor.conversationId);
-            }
-            handleMenuClose();
-          }}
-        >
-          <ListItemIcon>
-            <Archive fontSize="small" />
-          </ListItemIcon>
+        <MenuItem onClick={() => { if(menuAnchor) handleArchiveConversation(menuAnchor.conversationId); handleMenuClose(); }}>
+          <ListItemIcon><Archive fontSize="small" /></ListItemIcon>
           Archive
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (menuAnchor) {
-              handleDeleteConversation(menuAnchor.conversationId);
-            }
-            handleMenuClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <ListItemIcon>
-            <Delete fontSize="small" color="error" />
-          </ListItemIcon>
+        <MenuItem onClick={() => { if(menuAnchor) handleDeleteConversation(menuAnchor.conversationId); handleMenuClose(); }} sx={{ color: 'error.main' }}>
+          <ListItemIcon><Delete fontSize="small" color="error" /></ListItemIcon>
           Delete
         </MenuItem>
       </Menu>

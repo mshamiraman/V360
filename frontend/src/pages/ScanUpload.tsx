@@ -17,6 +17,10 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
 } from '@mui/material';
 import {
   CloudUpload,
@@ -26,6 +30,8 @@ import {
   ContentCopy,
   Info,
   ExpandMore,
+  Terminal,
+  FilePresent,
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { scanAPI } from '../services/api';
@@ -39,7 +45,6 @@ const ScanUpload: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // Could add a toast notification here
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }
@@ -108,202 +113,177 @@ const ScanUpload: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Upload Nmap Scan
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 1 }}>
+          Scan Ingestion
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Upload your Nmap XML reports to trigger AI vulnerability analysis.
+        </Typography>
+      </Box>
 
       <Paper
         {...getRootProps()}
         sx={{
-          p: 4,
-          mb: 3,
+          p: 6,
+          mb: 4,
           border: '2px dashed',
-          borderColor: isDragActive ? 'primary.main' : 'grey.300',
-          bgcolor: isDragActive ? 'action.hover' : 'background.paper',
+          borderColor: isDragActive ? 'primary.main' : 'divider',
+          bgcolor: (theme) => theme.palette.mode === 'dark' 
+            ? (isDragActive ? 'rgba(99, 102, 241, 0.1)' : 'rgba(30, 41, 59, 0.4)')
+            : (isDragActive ? 'rgba(99, 102, 241, 0.05)' : 'rgba(255, 255, 255, 0.6)'),
+          backdropFilter: 'blur(10px)',
           cursor: 'pointer',
           textAlign: 'center',
-          transition: 'all 0.3s ease',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          borderRadius: 6,
+          transform: isDragActive ? 'scale(1.01)' : 'scale(1)',
           '&:hover': {
             borderColor: 'primary.main',
-            bgcolor: 'action.hover',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(99, 102, 241, 0.05)' : 'rgba(99, 102, 241, 0.02)',
           },
         }}
       >
         <input {...getInputProps()} />
-        <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          {isDragActive
-            ? 'Drop the XML files here...'
-            : 'Drag & drop Nmap XML files here, or click to select'}
+        <Box sx={{ 
+          width: 80, height: 80, borderRadius: '50%', 
+          bgcolor: 'primary.main', opacity: 0.1, 
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 24px'
+        }}>
+          <CloudUpload sx={{ fontSize: 40, color: 'primary.main' }} />
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, fontFamily: '"Outfit", sans-serif' }}>
+          {isDragActive ? 'Release to initiate upload' : 'Secure Data Ingestion'}
         </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Supports multiple files up to 10MB each
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Drag & drop Nmap XML files here, or click to browse files
         </Typography>
         <Button
           variant="contained"
-          sx={{ mt: 2 }}
+          size="large"
+          sx={{ borderRadius: 2.5, px: 4, py: 1.2, fontWeight: 700, textTransform: 'none' }}
           disabled={uploading}
         >
-          Select Files
+          {uploading ? 'Ingesting Data...' : 'Select Files'}
         </Button>
       </Paper>
 
       {uploading && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" gutterBottom>
-            Uploading and processing...
-          </Typography>
-          <LinearProgress />
+        <Box sx={{ mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>Analyzing Nmap XML...</Typography>
+            <Typography variant="body2" color="text.secondary">In Progress</Typography>
+          </Box>
+          <LinearProgress sx={{ height: 6, borderRadius: 3 }} />
         </Box>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
+        <Alert severity="error" sx={{ mb: 4, borderRadius: 3 }}>{error}</Alert>
       )}
 
       {uploadedScans.length > 0 && (
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Recent Uploads
-          </Typography>
-          <List>
-            {uploadedScans.map((scan) => (
-              <ListItem key={scan.id} divider>
-                <ListItemIcon>
-                  {getStatusIcon(scan.status)}
-                </ListItemIcon>
+        <Card sx={{ mb: 4, borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'transparent', boxShadow: 'none' }}>
+          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>Recent Activities</Typography>
+          </Box>
+          <List disablePadding>
+            {uploadedScans.map((scan, idx) => (
+              <ListItem key={scan.id} divider={idx !== uploadedScans.length - 1} sx={{ px: 3, py: 2 }}>
+                <ListItemIcon sx={{ minWidth: 48 }}>{getStatusIcon(scan.status)}</ListItemIcon>
                 <ListItemText
-                  primary={scan.filename}
+                  primary={<Typography variant="body2" sx={{ fontWeight: 700 }}>{scan.filename}</Typography>}
                   secondary={
-                    <Box>
-                      <Typography variant="body2" color="textSecondary">
-                        Uploaded: {new Date(scan.upload_time).toLocaleString()}
-                      </Typography>
-                      {scan.file_size && (
-                        <Typography variant="body2" color="textSecondary">
-                          Size: {(scan.file_size / 1024).toFixed(1)} KB
-                        </Typography>
-                      )}
-                      {scan.error_message && (
-                        <Typography variant="body2" color="error">
-                          Error: {scan.error_message}
-                        </Typography>
-                      )}
-                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(scan.upload_time).toLocaleString()} • {scan.file_size ? (scan.file_size / 1024).toFixed(1) : '0.0'} KB
+                    </Typography>
                   }
                 />
                 <Chip
-                  label={scan.status}
+                  label={scan.status.toUpperCase()}
                   color={getStatusColor(scan.status) as any}
                   size="small"
+                  sx={{ borderRadius: 1.5, fontWeight: 800, fontSize: '0.65rem', height: 20 }}
                 />
               </ListItem>
             ))}
           </List>
-        </Paper>
+        </Card>
       )}
 
-      <Box sx={{ mt: 3 }}>
-        <Alert severity="info">
-          <Typography variant="h6" gutterBottom>
-            Upload Instructions
-          </Typography>
-          <Typography variant="body2" component="div">
-            <ul>
-              <li>Upload Nmap XML scan results for vulnerability analysis</li>
-              <li>Files will be automatically parsed and analyzed using AI</li>
-              <li>Processing typically takes 30-60 seconds per file</li>
-              <li>You can view results in the Dashboard and Vulnerabilities sections</li>
-            </ul>
-          </Typography>
-        </Alert>
-      </Box>
-
-      {/* Nmap Information Box */}
-      <Box sx={{ mt: 3 }}>
-        <Accordion>
-          <AccordionSummary expandIcon={<ExpandMore />}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Info color="primary" />
-              <Typography variant="h6">What is Nmap & How to Generate XML Scans</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box>
-              <Typography variant="body2" gutterBottom sx={{ mb: 2 }}>
-                <strong>Nmap</strong> is a powerful network scanning tool used to discover hosts, services, and security vulnerabilities on computer networks.
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ height: '100%', borderRadius: 4, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" gap={1.5} mb={2.5}>
+                <Info color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>Ingestion Protocols</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {[
+                  'Upload Nmap XML results for vulnerability analysis',
+                  'AI-driven parsing for CVE identification',
+                  'Remediation steps generated via Gemini Pro',
+                  'Secure processing within localized environment'
+                ].map((text, i) => (
+                  <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                    <CheckCircle sx={{ color: 'primary.main', fontSize: 18, mt: 0.3 }} />
+                    <Typography variant="body2">{text}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        <Grid item xs={12} md={6}>
+          <Accordion 
+            sx={{ 
+              borderRadius: '16px !important', 
+              border: '1px solid', 
+              borderColor: 'divider', 
+              bgcolor: 'background.paper',
+              boxShadow: 'none',
+              '&:before': { display: 'none' }
+            }}
+          >
+            <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 3, py: 1 }}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Terminal color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>Scan Generation Guide</Typography>
+              </Box>
+            </AccordionSummary>
+            <AccordionDetails sx={{ px: 3, pb: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Generate compatible XML files using the following network orchestration commands.
               </Typography>
               
-              <Typography variant="subtitle2" gutterBottom sx={{ mt: 2, mb: 1 }}>
-                Generate Nmap XML files with these commands:
-              </Typography>
-              
-              {/* Ubuntu/Linux Commands */}
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" fontWeight="bold" gutterBottom>
-                  Ubuntu/Linux:
-                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', display: 'block', mb: 1, textTransform: 'uppercase' }}>Unix-based (Linux/macOS)</Typography>
                 <Box sx={{ 
-                  bgcolor: '#f5f5f5', 
-                  p: 2, 
-                  borderRadius: 1, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  fontFamily: 'monospace'
+                  bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)', 
+                  p: 2, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  border: '1px solid', borderColor: 'divider'
                 }}>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                    sudo nmap -sV -sC -oX scan_results.xml &lt;target_ip&gt;
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                    sudo nmap -sV -sC -oX scan.xml [target]
                   </Typography>
                   <Tooltip title="Copy command">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => copyToClipboard('sudo nmap -sV -sC -oX scan_results.xml <target_ip>')}
-                    >
+                    <IconButton size="small" onClick={() => copyToClipboard('sudo nmap -sV -sC -oX scan.xml <target_ip>')}>
                       <ContentCopy fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </Box>
               </Box>
 
-              {/* macOS Commands */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" fontWeight="bold" gutterBottom>
-                  macOS:
-                </Typography>
-                <Box sx={{ 
-                  bgcolor: '#f5f5f5', 
-                  p: 2, 
-                  borderRadius: 1, 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  fontFamily: 'monospace'
-                }}>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                    brew install nmap && nmap -sV -sC -oX scan_results.xml &lt;target_ip&gt;
-                  </Typography>
-                  <Tooltip title="Copy command">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => copyToClipboard('brew install nmap && nmap -sV -sC -oX scan_results.xml <target_ip>')}
-                    >
-                      <ContentCopy fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
-
-              <Typography variant="caption" color="textSecondary">
-                Replace &lt;target_ip&gt; with the actual IP address or hostname you want to scan. 
-                The -sV flag detects service versions, -sC runs default scripts, and -oX outputs results in XML format.
+              <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                Note: Ensure service version detection (-sV) is enabled for optimal AI analysis results.
               </Typography>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

@@ -27,6 +27,7 @@ import {
   Alert,
   Snackbar,
   Tooltip,
+  Divider,
 } from '@mui/material';
 import {
   Add,
@@ -34,6 +35,9 @@ import {
   Visibility,
   Assessment,
   Delete,
+  FilePresent,
+  CheckCircle,
+  TrendingUp,
 } from '@mui/icons-material';
 import { reportAPI, scanAPI } from '../services/api';
 import { Report, Scan } from '../types';
@@ -147,7 +151,7 @@ const Reports: React.FC = () => {
   };
 
   const getReportTypeColor = (type: string) => {
-    return 'primary';  // Single report type uses primary color
+    return 'primary';
   };
 
   const getFormatIcon = (format: string) => {
@@ -166,157 +170,159 @@ const Reports: React.FC = () => {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+        <CircularProgress thickness={5} size={48} sx={{ color: 'primary.main' }} />
       </Box>
     );
   }
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">
-          Reports
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box>
+          <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 1 }}>
+            Assessments
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Generated vulnerability reports and executive security summaries.
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => setGenerateDialog(true)}
           disabled={scans.length === 0}
+          sx={{ borderRadius: 2, px: 3, fontWeight: 700, textTransform: 'none' }}
         >
-          Generate Report
+          New Assessment
         </Button>
       </Box>
 
-
       {scans.length === 0 && (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          No completed scans available. Upload and process a scan first to generate reports.
+        <Alert severity="info" sx={{ mb: 4, borderRadius: 3 }}>
+          No completed scans available for report generation. Ingest data first.
         </Alert>
       )}
 
-      <Card>
-        <CardContent>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Title</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Format</TableCell>
-                  <TableCell>Generated</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {reports.map((report) => (
-                  <TableRow key={report.id}>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight="bold">
-                        {report.title || `Report ${report.id}`}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={report.report_type}
-                        color={getReportTypeColor(report.report_type) as any}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <span>{getFormatIcon(report.format)}</span>
-                        <Chip
-                          label={report.format.toUpperCase()}
-                          variant="outlined"
-                          size="small"
-                        />
+      <Card sx={{ 
+        borderRadius: 4, 
+        border: '1px solid', 
+        borderColor: 'divider', 
+        bgcolor: 'transparent', 
+        boxShadow: 'none',
+        overflow: 'hidden'
+      }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>Assessment Title</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Format</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Generated At</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, pr: 3 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {reports.map((report) => (
+                <TableRow key={report.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                  <TableCell sx={{ py: 2.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ 
+                        width: 40, height: 40, borderRadius: 2, 
+                        bgcolor: 'primary.main', opacity: 0.1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}>
+                        <Assessment sx={{ color: 'primary.main' }} fontSize="small" />
                       </Box>
-                    </TableCell>
-                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {report.title || `Assessment ${report.id}`}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={report.report_type.toUpperCase()}
+                      color={getReportTypeColor(report.report_type) as any}
+                      size="small"
+                      sx={{ fontWeight: 800, borderRadius: 1.5, fontSize: '0.65rem' }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Typography variant="body2" sx={{ opacity: 0.8 }}>{getFormatIcon(report.format)}</Typography>
+                      <Chip
+                        label={report.format.toUpperCase()}
+                        variant="outlined"
+                        size="small"
+                        sx={{ fontWeight: 700, fontSize: '0.65rem', height: 20 }}
+                      />
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">
                       {new Date(report.generated_at).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip title="Preview Report">
-                        <IconButton
-                          onClick={() => handleViewReport(report.id)}
-                          color="primary"
-                          size="small"
-                        >
-                          <Visibility />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Download Report">
-                        <IconButton
-                          onClick={() => handleDownloadReport(report.id)}
-                          color="secondary"
-                          size="small"
-                        >
-                          <Download />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Report">
-                        <IconButton
-                          onClick={() => handleDeleteClick(report)}
-                          color="error"
-                          size="small"
-                        >
-                          <Delete />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right" sx={{ pr: 2 }}>
+                    <Tooltip title="Preview Content">
+                      <IconButton onClick={() => handleViewReport(report.id)} color="primary"><Visibility fontSize="small" /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download File">
+                      <IconButton onClick={() => handleDownloadReport(report.id)} color="secondary"><Download fontSize="small" /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Purge Record">
+                      <IconButton onClick={() => handleDeleteClick(report)} color="error"><Delete fontSize="small" /></IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-          {reports.length === 0 && (
-            <Box textAlign="center" py={4}>
-              <Assessment sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" color="textSecondary" gutterBottom>
-                No reports generated yet
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Generate your first report from a completed scan
-              </Typography>
-            </Box>
-          )}
-        </CardContent>
+        {reports.length === 0 && (
+          <Box textAlign="center" py={8}>
+            <FilePresent sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.2, mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">No assessments generated</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Start by generating your first technical security assessment.
+            </Typography>
+          </Box>
+        )}
       </Card>
 
       {/* Generate Report Dialog */}
       <Dialog
         open={generateDialog}
         onClose={() => setGenerateDialog(false)}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { borderRadius: 4, p: 1 } }}
       >
-        <DialogTitle>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Assessment color="primary" />
-            Generate New Report
-          </Box>
+        <DialogTitle sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', pt: 3 }}>
+          Initialize New Assessment
         </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Generate a detailed vulnerability assessment report that combines executive summary and technical analysis with AI-powered insights and remediation recommendations.
+        <DialogContent sx={{ pt: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            Select a completed scan orchestration to generate a comprehensive AI-powered vulnerability analysis.
           </Typography>
           
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Select Scan</InputLabel>
+              <FormControl fullWidth size="small">
+                <InputLabel>Source Infrastructure Scan</InputLabel>
                 <Select
                   value={selectedScanId}
-                  label="Select Scan"
+                  label="Source Infrastructure Scan"
                   onChange={(e) => setSelectedScanId(e.target.value as number)}
+                  sx={{ borderRadius: 2 }}
                 >
                   {scans.map((scan) => (
                     <MenuItem key={scan.id} value={scan.id}>
-                      <Box>
-                        <Typography variant="body1">{scan.filename}</Typography>
+                      <Box sx={{ py: 0.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{scan.filename}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          Uploaded: {new Date(scan.upload_time).toLocaleDateString()}
+                          Processed: {new Date(scan.upload_time).toLocaleDateString()}
                         </Typography>
                       </Box>
                     </MenuItem>
@@ -326,59 +332,41 @@ const Reports: React.FC = () => {
             </Grid>
             
             <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel>Format</InputLabel>
+              <FormControl fullWidth size="small">
+                <InputLabel>Delivery Format</InputLabel>
                 <Select
                   value={reportFormat}
-                  label="Format"
+                  label="Delivery Format"
                   onChange={(e) => setReportFormat(e.target.value as 'html' | 'pdf')}
+                  sx={{ borderRadius: 2 }}
                 >
-                  <MenuItem value="html">
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <span>🌐</span>
-                      <Box>
-                        <Typography variant="body2">HTML</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Web-viewable format
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="pdf">
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <span>📄</span>
-                      <Box>
-                        <Typography variant="body2">PDF</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Professional print-ready document
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </MenuItem>
+                  <MenuItem value="html">HTML Dynamic Web Interface</MenuItem>
+                  <MenuItem value="pdf">PDF Professional Print Document</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
           </Grid>
           
           {selectedScanId && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>Detailed Report:</strong> This comprehensive report will include executive summary, 
-                technical vulnerability details, intelligent analysis, business impact assessment, and 
-                OS-specific remediation commands powered by advanced LLM technology.
-              </Typography>
-            </Alert>
+            <Box sx={{ mt: 3, p: 2, borderRadius: 3, bgcolor: 'primary.main', opacity: 0.05, border: '1px solid', borderColor: 'primary.main' }}>
+              <Box display="flex" gap={1.5} alignItems="flex-start">
+                <TrendingUp sx={{ color: 'primary.main', fontSize: 20, mt: 0.2 }} />
+                <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+                  Advanced analysis will include executive summary, technical debt evaluation, and LLM-driven remediation workflows.
+                </Typography>
+              </Box>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setGenerateDialog(false)}>Cancel</Button>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setGenerateDialog(false)} variant="text" sx={{ fontWeight: 700 }}>Cancel</Button>
           <Button
             onClick={handleGenerateReport}
             variant="contained"
             disabled={!selectedScanId || generating}
-            startIcon={generating ? <CircularProgress size={20} /> : <Assessment />}
+            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            {generating ? 'Generating Report...' : 'Generate Report'}
+            {generating ? 'Processing AI Models...' : 'Start Assessment'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -390,101 +378,104 @@ const Reports: React.FC = () => {
         maxWidth="lg"
         fullWidth
         PaperProps={{
-          sx: { height: '90vh' }
+          sx: { height: '90vh', borderRadius: 4 }
         }}
       >
-        <DialogTitle>
+        <DialogTitle sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 4, py: 3 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box>
-              <Typography variant="h6">{selectedReport?.title}</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>{selectedReport?.title}</Typography>
               <Box display="flex" gap={1} mt={1}>
                 <Chip
-                  label={selectedReport?.report_type}
-                  color={getReportTypeColor(selectedReport?.report_type || '') as any}
+                  label={selectedReport?.report_type.toUpperCase()}
+                  color="primary"
                   size="small"
+                  sx={{ fontWeight: 800, borderRadius: 1, fontSize: '0.6rem' }}
                 />
                 <Chip
                   label={`${getFormatIcon(selectedReport?.format || '')} ${selectedReport?.format?.toUpperCase()}`}
                   variant="outlined"
                   size="small"
+                  sx={{ fontWeight: 800, borderRadius: 1, fontSize: '0.6rem' }}
                 />
               </Box>
             </Box>
-            <Typography variant="caption" color="text.secondary">
-              Generated: {selectedReport?.generated_at && new Date(selectedReport.generated_at).toLocaleString()}
-            </Typography>
+            <IconButton onClick={() => setSelectedReport(null)}><Add sx={{ transform: 'rotate(45deg)' }} /></IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ height: '100%', overflow: 'auto' }}>
+        <DialogContent sx={{ px: 4, py: 4 }}>
           {selectedReport?.format === 'pdf' ? (
-            <Box textAlign="center" py={4}>
-              <Typography variant="h6" gutterBottom>
-                📄 PDF Report Preview
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                PDF reports cannot be previewed directly. Click download to view the full report.
+            <Box textAlign="center" py={10} sx={{ bgcolor: 'background.default', borderRadius: 4, border: '1px dashed', borderColor: 'divider' }}>
+              <FilePresent sx={{ fontSize: 64, color: 'text.secondary', opacity: 0.2, mb: 3 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>Portable Document Format (PDF)</Typography>
+              <Typography variant="body2" color="text.secondary" mb={4}>
+                Professional PDF assessments are optimized for distribution and printing.
               </Typography>
               <Button
                 variant="contained"
                 startIcon={<Download />}
                 onClick={() => selectedReport && handleDownloadReport(selectedReport.id)}
                 size="large"
+                sx={{ borderRadius: 2.5, px: 4, fontWeight: 700 }}
               >
-                Download PDF Report
+                Download Assessment
               </Button>
             </Box>
           ) : selectedReport?.content ? (
             <Box
               sx={{
                 '& h1, & h2, & h3': { 
+                  fontFamily: '"Outfit", sans-serif',
                   color: 'primary.main', 
-                  mt: 3, 
+                  mt: 4, 
                   mb: 2,
-                  borderBottom: '2px solid',
-                  borderColor: 'primary.light',
-                  pb: 1
+                  fontWeight: 800
                 },
-                '& h1': { fontSize: '2rem' },
-                '& h2': { fontSize: '1.5rem' },
+                '& h1': { fontSize: '2.25rem', borderBottom: '2px solid', borderColor: 'divider', pb: 2, mb: 4 },
+                '& h2': { fontSize: '1.75rem', mt: 5 },
                 '& h3': { fontSize: '1.25rem' },
-                '& p': { mb: 2, lineHeight: 1.6 },
-                '& ul, & ol': { pl: 3, mb: 2 },
-                '& li': { mb: 1 },
-                '& strong': { color: 'text.primary' },
+                '& p': { mb: 2.5, lineHeight: 1.8, color: 'text.secondary', fontSize: '1rem' },
+                '& ul, & ol': { pl: 3, mb: 3, color: 'text.secondary' },
+                '& li': { mb: 1.5 },
+                '& strong': { color: 'text.primary', fontWeight: 700 },
                 '& code': { 
-                  backgroundColor: 'grey.100',
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
                   padding: '2px 6px',
                   borderRadius: 1,
                   fontFamily: 'monospace',
-                  fontSize: '0.875rem'
+                  fontSize: '0.9rem'
                 },
                 '& pre': {
-                  backgroundColor: 'grey.100',
-                  p: 2,
-                  borderRadius: 1,
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)',
+                  p: 3,
+                  borderRadius: 3,
                   overflow: 'auto',
-                  fontSize: '0.875rem'
+                  fontSize: '0.9rem',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  mb: 4
                 },
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                fontFamily: '"Inter", sans-serif'
               }}
               dangerouslySetInnerHTML={{ __html: selectedReport.content }}
             />
           ) : (
-            <Box textAlign="center" py={4}>
+            <Box textAlign="center" py={10}>
               <Typography variant="body1" color="text.secondary">
-                No content available for preview.
+                Intelligence data unavailable for preview.
               </Typography>
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setSelectedReport(null)}>Close</Button>
+        <DialogActions sx={{ px: 4, py: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Button onClick={() => setSelectedReport(null)} variant="text" sx={{ fontWeight: 700 }}>Dismiss</Button>
           <Button
             onClick={() => selectedReport && handleDownloadReport(selectedReport.id)}
             variant="contained"
             startIcon={<Download />}
+            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
           >
-            Download {selectedReport?.format?.toUpperCase()}
+            Export as {selectedReport?.format?.toUpperCase()}
           </Button>
         </DialogActions>
       </Dialog>
@@ -493,59 +484,41 @@ const Reports: React.FC = () => {
       <Dialog
         open={deleteDialog}
         onClose={() => setDeleteDialog(false)}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
+        PaperProps={{ sx: { borderRadius: 4 } }}
       >
-        <DialogTitle>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Delete color="error" />
-            Confirm Delete
-          </Box>
+        <DialogTitle sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>
+          Purge Assessment Record
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body1" gutterBottom>
-            Are you sure you want to delete the report <strong>"{reportToDelete?.title}"</strong>?
+          <Typography variant="body2">
+            Are you sure you want to permanently delete <strong>"{reportToDelete?.title}"</strong>?
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            This action cannot be undone. The report file will be permanently deleted from the system.
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+            This will remove the generated file from secure storage. This action cannot be reversed.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)}>
-            Cancel
-          </Button>
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={() => setDeleteDialog(false)} variant="text">Cancel</Button>
           <Button 
             onClick={handleDeleteConfirm} 
             color="error" 
             variant="contained"
             disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={20} /> : <Delete />}
+            sx={{ borderRadius: 2, fontWeight: 700 }}
           >
-            {deleting ? 'Deleting...' : 'Delete Report'}
+            {deleting ? 'Purging...' : 'Confirm Purge'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Success Snackbar */}
-      <Snackbar
-        open={!!success}
-        autoHideDuration={6000}
-        onClose={() => setSuccess('')}
-      >
-        <Alert onClose={() => setSuccess('')} severity="success" sx={{ width: '100%' }}>
-          {success}
-        </Alert>
+      <Snackbar open={!!success} autoHideDuration={4000} onClose={() => setSuccess('')}>
+        <Alert severity="success" sx={{ borderRadius: 2, fontWeight: 600 }}>{success}</Alert>
       </Snackbar>
 
-      {/* Error Snackbar */}
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={() => setError('')}
-      >
-        <Alert onClose={() => setError('')} severity="error" sx={{ width: '100%' }}>
-          {error}
-        </Alert>
+      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError('')}>
+        <Alert severity="error" sx={{ borderRadius: 2, fontWeight: 600 }}>{error}</Alert>
       </Snackbar>
     </Box>
   );

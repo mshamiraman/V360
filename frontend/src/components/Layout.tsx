@@ -82,26 +82,104 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }
 
   const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Security sx={{ fontSize: 32, color: 'primary.main' }} />
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontFamily: '"Outfit", sans-serif', 
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            background: (theme) => theme.palette.mode === 'dark' 
+              ? 'linear-gradient(135deg, #FFF 0%, #94A3B8 100%)'
+              : 'linear-gradient(135deg, #0F172A 0%, #64748B 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           VulnPatch AI
         </Typography>
-      </Toolbar>
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+      </Box>
+      <List sx={{ px: 2, flexGrow: 1 }}>
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                selected={isActive}
+                onClick={() => navigate(item.path)}
+                sx={{
+                  borderRadius: '12px',
+                  transition: 'all 0.2s',
+                  '&.Mui-selected': {
+                    background: (theme) => theme.palette.mode === 'dark'
+                      ? 'rgba(99, 102, 241, 0.12)'
+                      : 'rgba(99, 102, 241, 0.08)',
+                    '&:hover': {
+                      background: (theme) => theme.palette.mode === 'dark'
+                        ? 'rgba(99, 102, 241, 0.18)'
+                        : 'rgba(99, 102, 241, 0.12)',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: 'primary.main',
+                      transform: 'scale(1.1)',
+                    },
+                    '& .MuiListItemText-primary': {
+                      fontWeight: 600,
+                      color: 'primary.main',
+                    },
+                  },
+                  '&:hover': {
+                    transform: 'translateX(4px)',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40, transition: 'all 0.2s' }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.text} 
+                  primaryTypographyProps={{ 
+                    fontSize: '0.95rem',
+                    fontWeight: isActive ? 600 : 500
+                  }} 
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
-    </div>
+      <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Box sx={{ 
+          p: 2, 
+          borderRadius: 3, 
+          bgcolor: 'action.hover',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2
+        }}>
+          <Avatar 
+            sx={{ 
+              width: 40, 
+              height: 40, 
+              bgcolor: 'primary.main',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)'
+            }}
+          >
+            {user?.email?.[0].toUpperCase() || 'U'}
+          </Avatar>
+          <Box sx={{ overflow: 'hidden' }}>
+            <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+              {user?.email?.split('@')[0]}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              Security Analyst
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 
   return (
@@ -112,53 +190,92 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          bgcolor: 'background.paper',
+          color: 'text.primary',
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {menuItems.find(item => item.path === location.pathname)?.text || 'VulnPatch AI'}
-          </Typography>
-          <ThemeToggle />
-          <IconButton
-            size="large"
-            edge="end"
-            aria-label="account of current user"
-            aria-controls="profile-menu"
-            aria-haspopup="true"
-            onClick={handleProfileMenuOpen}
-            color="inherit"
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              <AccountCircle />
-            </Avatar>
-          </IconButton>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { sm: 'none' } }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography 
+              variant="h6" 
+              noWrap 
+              sx={{ 
+                fontWeight: 700, 
+                fontFamily: '"Outfit", sans-serif',
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              {menuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ThemeToggle />
+            <IconButton
+              size="large"
+              onClick={handleProfileMenuOpen}
+              sx={{ 
+                p: 0.5,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '10px'
+              }}
+            >
+              <Avatar 
+                sx={{ 
+                  width: 32, 
+                  height: 32, 
+                  fontSize: '0.875rem',
+                  fontWeight: 700,
+                  bgcolor: 'primary.main',
+                }}
+              >
+                {user?.email?.[0].toUpperCase()}
+              </Avatar>
+            </IconButton>
+          </Box>
+          
           <Menu
             id="profile-menu"
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleProfileMenuClose}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            PaperProps={{
+              sx: {
+                mt: 1.5,
+                minWidth: 180,
+                borderRadius: 3,
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+              }
+            }}
           >
-            <MenuItem onClick={handleProfileMenuClose}>
-              <ListItemIcon>
-                <AccountCircle fontSize="small" />
-              </ListItemIcon>
-              {user?.email}
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <Logout fontSize="small" />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{user?.email}</Typography>
+              <Typography variant="caption" color="text.secondary">Administrator</Typography>
+            </Box>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleProfileMenuClose}>
+                <ListItemIcon sx={{ minWidth: 36 }}><AccountCircle fontSize="small" /></ListItemIcon>
+                <ListItemText primary="My Profile" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
+                <ListItemIcon sx={{ minWidth: 36, color: 'error.main' }}><Logout fontSize="small" /></ListItemIcon>
+                <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
           </Menu>
         </Toolbar>
       </AppBar>
