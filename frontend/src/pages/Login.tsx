@@ -226,7 +226,7 @@ const Login: React.FC = () => {
           </Box>
         </Paper>
         <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 4, fontWeight: 500 }}>
-          © 2026 Aman V360. Advanced Security Analytics Platform.
+          © 2026 Quamrah. Advanced Security Analytics Platform.
         </Typography>
       </Container>
     </Box>

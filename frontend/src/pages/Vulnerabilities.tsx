@@ -522,14 +522,7 @@ const Vulnerabilities: React.FC = () => {
                     </Box>
                   </Box>
                 </Box>
-                
-                <Button 
-                  fullWidth variant="outlined" startIcon={<Feedback />} 
-                  onClick={() => setFeedbackDialog(true)}
-                  sx={{ mt: 2, borderRadius: 2 }}
-                >
-                  Give Feedback on Recommendation
-                </Button>
+              
               </Grid>
               
               <Grid item xs={12} md={7}>

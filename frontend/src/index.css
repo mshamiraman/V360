@@ -1,0 +1,28 @@
+/* Global Styles & Sunrise Theme Reveal Transitions */
+
+/* View Transitions API Styling for Sunrise Circular Reveal */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 99999;
+}
+
+/* Ensure smooth background transition for fallback elements */
+.sunrise-transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999999;
+  transition: clip-path 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}

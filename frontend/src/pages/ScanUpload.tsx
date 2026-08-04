@@ -21,6 +21,7 @@ import {
   CardContent,
   Divider,
   Grid,
+  alpha,
 } from '@mui/material';
 import {
   CloudUpload,
@@ -118,7 +119,7 @@ const ScanUpload: React.FC = () => {
           Scan Ingestion
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Upload your Nmap XML reports to trigger AI vulnerability analysis.
+          Upload your Nmap XML reports to trigger Aman V360 AI vulnerability analysis.
         </Typography>
       </Box>
 
@@ -147,7 +148,7 @@ const ScanUpload: React.FC = () => {
         <input {...getInputProps()} />
         <Box sx={{ 
           width: 80, height: 80, borderRadius: '50%', 
-          bgcolor: 'primary.main', opacity: 0.1, 
+          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 24px'
         }}>

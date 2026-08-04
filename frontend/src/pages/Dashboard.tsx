@@ -195,7 +195,7 @@ const Dashboard: React.FC = () => {
       <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <Box>
           <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, fontFamily: '"Outfit", sans-serif', letterSpacing: '-1.5px' }}>
-            Aman V360 Intelligence
+            Quamrah Intelligence
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             Real-time security orchestration and vulnerability life-cycle monitoring.

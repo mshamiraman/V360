@@ -98,7 +98,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Aman V360
+          Quamrah
         </Typography>
       </Box>
       <List sx={{ px: 2, flexGrow: 1 }}>

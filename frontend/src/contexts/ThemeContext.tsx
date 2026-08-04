@@ -5,7 +5,7 @@ import api from '../services/api';
 
 interface ThemeContextType {
   mode: PaletteMode;
-  toggleTheme: () => void;
+  toggleTheme: (event?: React.MouseEvent | { clientX: number; clientY: number }) => void;
   setTheme: (mode: PaletteMode) => void;
   loadUserPreferences: () => Promise<void>;
 }
@@ -222,7 +222,7 @@ const darkTheme = createTheme({
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [mode, setMode] = useState<PaletteMode>(() => {
     // Check localStorage for saved theme preference
-    const savedTheme = localStorage.getItem('vulnpatch-theme');
+    const savedTheme = localStorage.getItem('aman-theme');
     if (savedTheme === 'dark' || savedTheme === 'light') {
       return savedTheme as PaletteMode;
     }
@@ -237,14 +237,63 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
-  const toggleTheme = () => {
+  const toggleTheme = (event?: React.MouseEvent | { clientX: number; clientY: number }) => {
     const newMode = mode === 'light' ? 'dark' : 'light';
-    setTheme(newMode);
+
+    // Calculate origin coordinates for sunrise expansion (defaulting to top-right)
+    let x = window.innerWidth - 60;
+    let y = 40;
+
+    if (event) {
+      if ('clientX' in event && 'clientY' in event && (event.clientX > 0 || event.clientY > 0)) {
+        x = event.clientX;
+        y = event.clientY;
+      } else if ('currentTarget' in event && event.currentTarget) {
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        x = rect.left + rect.width / 2;
+        y = rect.top + rect.height / 2;
+      }
+    }
+
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    document.documentElement.style.setProperty('--theme-x', `${x}px`);
+    document.documentElement.style.setProperty('--theme-y', `${y}px`);
+    document.documentElement.style.setProperty('--theme-r', `${endRadius}px`);
+
+    // Use modern View Transitions API if supported
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      const transition = (document as any).startViewTransition(() => {
+        setTheme(newMode);
+      });
+
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`
+            ]
+          },
+          {
+            duration: 700,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            pseudoElement: '::view-transition-new(root)'
+          }
+        );
+      });
+    } else {
+      // Fallback
+      setTheme(newMode);
+    }
   };
 
   const setTheme = async (newMode: PaletteMode) => {
     setMode(newMode);
-    localStorage.setItem('vulnpatch-theme', newMode);
+    localStorage.setItem('aman-theme', newMode);
     
     // Temporarily disable backend sync to prevent unauthorized requests
     // TODO: Re-enable after proper authentication flow
@@ -267,7 +316,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      const savedTheme = localStorage.getItem('vulnpatch-theme');
+      const savedTheme = localStorage.getItem('aman-theme');
       if (savedTheme === 'auto' || !savedTheme) {
         setMode(e.matches ? 'dark' : 'light');
       }
