@@ -271,16 +271,29 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       });
 
       transition.ready.then(() => {
+        const glowColor = newMode === 'light' 
+          ? 'rgba(251, 191, 36, 0.65)' 
+          : 'rgba(99, 102, 241, 0.65)';
+
         document.documentElement.animate(
+          [
+            {
+              clipPath: `circle(0px at ${x}px ${y}px)`,
+              filter: `drop-shadow(0 0 50px ${glowColor}) brightness(1.04)`,
+            },
+            {
+              clipPath: `circle(${endRadius * 0.45}px at ${x}px ${y}px)`,
+              filter: `drop-shadow(0 0 35px ${glowColor}) brightness(1.02)`,
+              offset: 0.45,
+            },
+            {
+              clipPath: `circle(${endRadius}px at ${x}px ${y}px)`,
+              filter: 'drop-shadow(0 0 0px transparent) brightness(1)',
+            }
+          ],
           {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${endRadius}px at ${x}px ${y}px)`
-            ]
-          },
-          {
-            duration: 700,
-            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            duration: 850,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
             pseudoElement: '::view-transition-new(root)'
           }
         );

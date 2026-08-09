@@ -32,6 +32,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
+import logo from '../static/assests/logo.png';
 
 const drawerWidth = 240;
 
@@ -83,23 +84,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const drawer = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Security sx={{ fontSize: 32, color: 'primary.main' }} />
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            fontFamily: '"Outfit", sans-serif', 
-            fontWeight: 700,
-            letterSpacing: '-0.5px',
-            background: (theme) => theme.palette.mode === 'dark' 
-              ? 'linear-gradient(135deg, #FFF 0%, #94A3B8 100%)'
-              : 'linear-gradient(135deg, #0F172A 0%, #64748B 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+      <Box sx={{ p: 2, px: 2.5, display: 'flex', alignItems: 'center' }}>
+        <Box
+          component="img"
+          src={logo}
+          alt="Qumarah"
+          sx={{
+            height: 52,
+            maxWidth: 180,
+            objectFit: 'contain',
+            filter: (theme) => theme.palette.mode === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none'
           }}
-        >
-          Quamrah
-        </Typography>
+        />
       </Box>
       <List sx={{ px: 2, flexGrow: 1 }}>
         {menuItems.map((item) => {

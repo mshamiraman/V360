@@ -1,6 +1,6 @@
 /* Global Styles & Sunrise Theme Reveal Transitions */
 
-/* View Transitions API Styling for Sunrise Circular Reveal */
+/* View Transitions API Styling for Smooth Sunrise Circular Reveal */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -9,10 +9,13 @@
 
 ::view-transition-old(root) {
   z-index: 1;
+  transform-origin: var(--theme-x, 90vw) var(--theme-y, 40px);
 }
 
 ::view-transition-new(root) {
   z-index: 99999;
+  transform-origin: var(--theme-x, 90vw) var(--theme-y, 40px);
+  will-change: clip-path, filter;
 }
 
 /* Ensure smooth background transition for fallback elements */

@@ -20,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 import { LoginForm } from '../types';
+import logo from '../static/assests/logo.png';
 
 const Login: React.FC = () => {
   const [formData, setFormData] = useState<LoginForm>({
@@ -105,24 +106,20 @@ const Login: React.FC = () => {
             textAlign: 'center'
           }}
         >
-          <Box sx={{ mb: 4 }}>
-            <Box sx={{ 
-              width: 64, 
-              height: 64, 
-              borderRadius: 3, 
-              bgcolor: 'primary.main', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              margin: '0 auto 16px',
-              boxShadow: '0 8px 16px rgba(99, 102, 241, 0.3)'
-            }}>
-              <Security sx={{ color: 'white', fontSize: 32 }} />
-            </Box>
-            <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 1 }}>
-              Aman V360
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+          <Box sx={{ mb: 3.5, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box
+              component="img"
+              src={logo}
+              alt="Qumarah Logo"
+              sx={{
+                height: 85,
+                maxWidth: 260,
+                objectFit: 'contain',
+                mb: 1.5,
+                filter: (theme) => theme.palette.mode === 'dark' ? 'invert(1) hue-rotate(180deg)' : 'none'
+              }}
+            />
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600, letterSpacing: 1 }}>
               ENTERPRISE SECURITY CONSOLE
             </Typography>
           </Box>
@@ -226,7 +223,7 @@ const Login: React.FC = () => {
           </Box>
         </Paper>
         <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 4, fontWeight: 500 }}>
-          © 2026 Quamrah. Advanced Security Analytics Platform.
+          © 2026 Qumarah. Advanced Security Analytics Platform.
         </Typography>
       </Container>
     </Box>
