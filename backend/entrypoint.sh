@@ -28,8 +28,8 @@ for attempt in range(max_retries):
             print(f'Database not ready (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay} seconds...')
             time.sleep(retry_delay)
         else:
-            print('ERROR: Could not connect to database after 30 attempts')
-            sys.exit(1)
+            print('WARNING: PostgreSQL database not ready. Proceeding with SQLite fallback...')
+            break
 "
 
 # Run database migrations

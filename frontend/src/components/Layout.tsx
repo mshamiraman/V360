@@ -19,7 +19,7 @@ import {
 import {
   Menu as MenuIcon,
   Dashboard,
-  CloudUpload,
+  Radar,
   History,
   Security,
   Assessment,
@@ -69,8 +69,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const menuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-    { text: 'Upload Scan', icon: <CloudUpload />, path: '/scan/upload' },
-    { text: 'Scan History', icon: <History />, path: '/scan/history' },
+    { text: 'New Scan', icon: <Radar />, path: '/scan/new' },
+    { text: 'All Scans', icon: <History />, path: '/scan/history' },
     { text: 'Search', icon: <Search />, path: '/search' },
     { text: 'Vulnerabilities', icon: <Security />, path: '/vulnerabilities' },
     { text: 'Reports', icon: <Assessment />, path: '/reports' },
@@ -99,7 +99,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </Box>
       <List sx={{ px: 2, flexGrow: 1 }}>
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const currentPath = location.pathname.replace(/\/$/, '');
+          const itemPath = item.path.replace(/\/$/, '');
+          const isActive = currentPath === itemPath;
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
@@ -210,7 +212,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 display: { xs: 'none', sm: 'block' }
               }}
             >
-              {menuItems.find(item => item.path === location.pathname)?.text || 'Dashboard'}
+              {menuItems.find(item => item.path.replace(/\/$/, '') === location.pathname.replace(/\/$/, ''))?.text || 'Dashboard'}
             </Typography>
           </Box>
           

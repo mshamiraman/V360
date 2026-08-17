@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Table,
   TableBody,
@@ -10,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Chip,
   IconButton,
   Button,
@@ -21,24 +19,27 @@ import {
   CircularProgress,
   Alert,
   Tooltip,
-  Divider,
-  Grid,
 } from '@mui/material';
 import {
-  Visibility,
   Delete,
   Refresh,
   FilePresent,
   Storage,
+  Radar,
+  PlayArrow,
+  Cancel as CancelIcon,
+  CalendarToday,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { scanAPI } from '../services/api';
 import { Scan } from '../types';
+import { getTemplateName } from '../constants/scanTemplates';
 
 const ScanHistory: React.FC = () => {
+  const navigate = useNavigate();
   const [scans, setScans] = useState<Scan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedScan, setSelectedScan] = useState<Scan | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [scanToDelete, setScanToDelete] = useState<Scan | null>(null);
 
@@ -48,7 +49,7 @@ const ScanHistory: React.FC = () => {
       const data = await scanAPI.getHistory();
       setScans(data);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load scan history');
+      setError(err.response?.data?.detail || 'Failed to load scans');
     } finally {
       setLoading(false);
     }
@@ -58,12 +59,28 @@ const ScanHistory: React.FC = () => {
     fetchScans();
   }, []);
 
-  const handleViewScan = async (scan: Scan) => {
+  const handleLaunchScan = async (scan: Scan) => {
+    if (!scan.template_id) return;
     try {
-      const detailedScan = await scanAPI.getScan(scan.id);
-      setSelectedScan(detailedScan);
+      const launched = await scanAPI.launch({
+        template_id: scan.template_id,
+        name: scan.filename,
+        targets: scan.targets || '',
+        folder: scan.folder,
+        schedule: scan.schedule,
+      });
+      setScans(prev => [launched, ...prev]);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load scan details');
+      setError(err.response?.data?.detail || 'Failed to launch scan');
+    }
+  };
+
+  const handleCancelScan = async (scan: Scan) => {
+    try {
+      const updated = await scanAPI.cancelScan(scan.id);
+      setScans(prev => prev.map(s => (s.id === scan.id ? updated : s)));
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to cancel scan');
     }
   };
 
@@ -88,17 +105,16 @@ const ScanHistory: React.FC = () => {
         return 'error';
       case 'processing':
         return 'warning';
+      case 'created':
+        return 'info';
+      case 'cancelled':
+        return 'default';
       default:
         return 'default';
     }
   };
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return 'N/A';
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
+  const getStatusLabel = (status: string) => (status === 'created' ? 'SAVED' : status.toUpperCase());
 
   if (loading) {
     return (
@@ -110,36 +126,46 @@ const ScanHistory: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h3" sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', mb: 1 }}>
-            Historical Archives
+            All Scans
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            View and manage your previous network scanning activities.
+            Launch, monitor, and review your vulnerability scans.
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Refresh />}
-          onClick={fetchScans}
-          sx={{ borderRadius: 2, px: 3, fontWeight: 700, textTransform: 'none' }}
-        >
-          Refresh Data
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={fetchScans}
+            sx={{ borderRadius: '10px', px: 2.5, fontWeight: 700, textTransform: 'none', borderColor: 'divider' }}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Radar />}
+            onClick={() => navigate('/scan/new')}
+            sx={{ borderRadius: '10px', px: 2.5, fontWeight: 700, textTransform: 'none', bgcolor: '#6366F1' }}
+          >
+            New Scan
+          </Button>
+        </Box>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }} onClose={() => setError('')}>
           {error}
         </Alert>
       )}
 
-      <Card sx={{ 
-        borderRadius: 4, 
-        border: '1px solid', 
-        borderColor: 'divider', 
-        bgcolor: 'transparent', 
+      <Card sx={{
+        borderRadius: 4,
+        border: '1px solid',
+        borderColor: 'divider',
+        bgcolor: 'transparent',
         boxShadow: 'none',
         overflow: 'hidden'
       }}>
@@ -147,52 +173,92 @@ const ScanHistory: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
-                <TableCell sx={{ fontWeight: 700, py: 2 }}>Resource Name</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Analysis Status</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Ingestion Timestamp</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Data Size</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2 }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Scan Type</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Schedule</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Last Scanned</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, pr: 3 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {scans.map((scan) => (
-                <TableRow key={scan.id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                <TableRow
+                  key={scan.id}
+                  hover
+                  onClick={() => navigate(`/scan/${scan.id}`)}
+                  sx={{ cursor: 'pointer', '&:last-child td': { border: 0 } }}
+                >
                   <TableCell sx={{ py: 2.5 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Box sx={{ 
-                        width: 40, height: 40, borderRadius: 2, 
+                      <Box sx={{
+                        width: 40, height: 40, borderRadius: 2,
                         bgcolor: 'primary.main', opacity: 0.1,
                         display: 'flex', alignItems: 'center', justifyContent: 'center'
                       }}>
                         <FilePresent sx={{ color: 'primary.main' }} fontSize="small" />
                       </Box>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>{scan.filename}</Typography>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>{scan.filename}</Typography>
+                        <Chip
+                          label={getStatusLabel(scan.status)}
+                          color={getStatusColor(scan.status) as any}
+                          size="small"
+                          sx={{ fontWeight: 800, borderRadius: 1.5, fontSize: '0.6rem', height: 18, mt: 0.5 }}
+                        />
+                      </Box>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={scan.status.toUpperCase()}
-                      color={getStatusColor(scan.status) as any}
-                      size="small"
-                      sx={{ fontWeight: 800, borderRadius: 1.5, fontSize: '0.65rem' }}
-                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {getTemplateName(scan.template_id)}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" color="text.secondary">
-                      {new Date(scan.upload_time).toLocaleString()}
+                      {scan.schedule || 'One-time'}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {formatFileSize(scan.file_size)}
-                    </Typography>
+                    {scan.processed_at ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {new Date(scan.processed_at).toLocaleString()}
+                      </Typography>
+                    ) : (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'text.secondary' }}>
+                        <CalendarToday sx={{ fontSize: 16 }} />
+                        <Typography variant="body2" color="text.secondary">N/A</Typography>
+                      </Box>
+                    )}
                   </TableCell>
                   <TableCell align="right" sx={{ pr: 2 }}>
-                    <Tooltip title="View Archives">
-                      <IconButton onClick={() => handleViewScan(scan)} color="primary"><Visibility fontSize="small" /></IconButton>
+                    <Tooltip title={!scan.template_id ? 'Not available for uploaded reports' : scan.status === 'created' ? 'Launch' : 'Launch Again'}>
+                      <span>
+                        <IconButton
+                          disabled={!scan.template_id}
+                          color="primary"
+                          onClick={(e) => { e.stopPropagation(); handleLaunchScan(scan); }}
+                        >
+                          <PlayArrow fontSize="small" />
+                        </IconButton>
+                      </span>
                     </Tooltip>
-                    <Tooltip title="Purge Record">
-                      <IconButton onClick={() => { setScanToDelete(scan); setDeleteDialogOpen(true); }} color="error"><Delete fontSize="small" /></IconButton>
+                    {scan.status === 'processing' && (
+                      <Tooltip title="Cancel Scan">
+                        <IconButton
+                          color="warning"
+                          onClick={(e) => { e.stopPropagation(); handleCancelScan(scan); }}
+                        >
+                          <CancelIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    <Tooltip title="Delete">
+                      <IconButton
+                        color="error"
+                        onClick={(e) => { e.stopPropagation(); setScanToDelete(scan); setDeleteDialogOpen(true); }}
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
                     </Tooltip>
                   </TableCell>
                 </TableRow>
@@ -204,58 +270,13 @@ const ScanHistory: React.FC = () => {
         {scans.length === 0 && (
           <Box textAlign="center" py={8}>
             <Storage sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.2, mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">No scanning history found</Typography>
+            <Typography variant="h6" color="text.secondary">No scans found</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Start by uploading your first Nmap XML report.
+              Launch a new scan or upload an Nmap XML report to get started.
             </Typography>
           </Box>
         )}
       </Card>
-
-      {/* Scan Details Dialog */}
-      <Dialog
-        open={!!selectedScan}
-        onClose={() => setSelectedScan(null)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 1 } }}
-      >
-        <DialogTitle sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif', pt: 3 }}>Archive Inspection</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          {selectedScan && (
-            <Box>
-              <Box sx={{ p: 2.5, borderRadius: 3, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider', mb: 3 }}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>METADATA</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>{selectedScan.filename}</Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}><Typography variant="caption" display="block" color="text.secondary">STATUS</Typography><Chip label={selectedScan.status.toUpperCase()} size="small" color={getStatusColor(selectedScan.status) as any} sx={{ mt: 0.5, fontWeight: 700 }} /></Grid>
-                  <Grid item xs={6}><Typography variant="caption" display="block" color="text.secondary">DATA SIZE</Typography><Typography variant="body2" sx={{ fontWeight: 700, mt: 0.5 }}>{formatFileSize(selectedScan.file_size)}</Typography></Grid>
-                  <Grid item xs={6}><Typography variant="caption" display="block" color="text.secondary">INGESTED</Typography><Typography variant="body2" sx={{ mt: 0.5 }}>{new Date(selectedScan.upload_time).toLocaleString()}</Typography></Grid>
-                  <Grid item xs={6}><Typography variant="caption" display="block" color="text.secondary">PROCESSED</Typography><Typography variant="body2" sx={{ mt: 0.5 }}>{selectedScan.processed_at ? new Date(selectedScan.processed_at).toLocaleString() : 'Pending'}</Typography></Grid>
-                </Grid>
-              </Box>
-
-              {selectedScan.error_message && (
-                <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{selectedScan.error_message}</Alert>
-              )}
-
-              {selectedScan.parsed_data && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>AI ANALYSIS SUMMARY</Typography>
-                  <Box sx={{ display: 'flex', gap: 3 }}>
-                    <Box><Typography variant="h4" sx={{ fontWeight: 800 }}>{selectedScan.parsed_data.total_hosts || 0}</Typography><Typography variant="caption" color="text.secondary">Hosts Scanned</Typography></Box>
-                    <Divider orientation="vertical" flexItem />
-                    <Box><Typography variant="h4" sx={{ fontWeight: 800 }}>{selectedScan.parsed_data.total_services || 0}</Typography><Typography variant="caption" color="text.secondary">Services Identified</Typography></Box>
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setSelectedScan(null)} variant="outlined" fullWidth sx={{ borderRadius: 2 }}>Close Archive</Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -263,16 +284,16 @@ const ScanHistory: React.FC = () => {
         onClose={() => setDeleteDialogOpen(false)}
         PaperProps={{ sx: { borderRadius: 4 } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>Purge Archive Record</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800, fontFamily: '"Outfit", sans-serif' }}>Delete Scan</DialogTitle>
         <DialogContent>
           <Typography variant="body2">
-            Are you sure you want to permanently delete the archive for <strong>{scanToDelete?.filename}</strong>? 
-            This action will also remove all associated AI vulnerability findings.
+            Are you sure you want to permanently delete <strong>{scanToDelete?.filename}</strong>?
+            This action will also remove all associated vulnerability findings.
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeleteScan} variant="contained" color="error" sx={{ borderRadius: 2 }}>Confirm Purge</Button>
+          <Button onClick={handleDeleteScan} variant="contained" color="error" sx={{ borderRadius: 2 }}>Delete</Button>
         </DialogActions>
       </Dialog>
     </Box>

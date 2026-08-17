@@ -10,7 +10,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Chip,
   IconButton,
   Button,
@@ -37,7 +36,6 @@ import {
 } from '@mui/material';
 import {
   Visibility,
-  Feedback,
   OpenInNew,
   Delete,
   Refresh,
@@ -546,7 +544,7 @@ const Vulnerabilities: React.FC = () => {
                     return (
                       <Typography key={idx} variant="body2" sx={{ mb: 1, display: 'flex', gap: 1 }}>
                         <Box sx={{ color: 'primary.main', mt: 0.2 }}>•</Box>
-                        {formatTextWithBold(clean.replace(/^[\*\-\d\.]+\s*/, ''), idx)}
+                        {formatTextWithBold(clean.replace(/^[*-\d.]+\s*/, ''), idx)}
                       </Typography>
                     );
                   }) : <Typography variant="body2" color="text.secondary italic">No recommendation generated.</Typography>}

@@ -148,6 +148,8 @@ class DashboardService:
         data_dict = {}
         for date, count in trends:
             # Convert UTC date to IST date
+            if isinstance(date, str):
+                date = datetime.strptime(date, "%Y-%m-%d").date()
             utc_datetime = datetime.combine(date, datetime.min.time())
             utc_datetime = pytz.UTC.localize(utc_datetime)
             ist_datetime = utc_datetime.astimezone(ist)

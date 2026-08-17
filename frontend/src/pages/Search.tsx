@@ -19,25 +19,13 @@ import {
   Chip,
   IconButton,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
   Autocomplete,
-  Divider,
   Alert,
   CircularProgress,
   Link,
-  Pagination,
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  ExpandMore,
   FilterList,
   Clear,
   Visibility,
@@ -45,7 +33,7 @@ import {
   OpenInNew,
   TuneOutlined,
 } from '@mui/icons-material';
-import { vulnerabilityAPI, scanAPI, reportAPI, searchAPI } from '../services/api';
+import { searchAPI, reportAPI } from '../services/api';
 import { Vulnerability, Scan, Report } from '../types';
 
 interface SearchFilters {
@@ -100,7 +88,7 @@ const Search: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [pageSize] = useState(20);
 
   // Options for autocomplete filters

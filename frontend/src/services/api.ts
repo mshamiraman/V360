@@ -1,10 +1,11 @@
-import axios, { AxiosResponse } from 'axios';
-import { 
-  User, 
-  Scan, 
-  Vulnerability, 
-  Report, 
-  DashboardMetrics, 
+import axios from 'axios';
+import {
+  User,
+  Scan,
+  ScanHost,
+  Vulnerability,
+  Report,
+  DashboardMetrics,
   TrendData,
   LoginForm,
   RegisterForm,
@@ -68,6 +69,32 @@ export const authAPI = {
 
 // Scan API
 export const scanAPI = {
+  launch: async (data: {
+    template_id: string;
+    name: string;
+    description?: string;
+    targets: string;
+    folder?: string;
+    schedule?: string;
+    email_notification?: boolean;
+  }): Promise<Scan> => {
+    const response = await api.post('/scan/launch', data);
+    return response.data;
+  },
+
+  saveScan: async (data: {
+    template_id: string;
+    name: string;
+    description?: string;
+    targets: string;
+    folder?: string;
+    schedule?: string;
+    email_notification?: boolean;
+  }): Promise<Scan> => {
+    const response = await api.post('/scan/save', data);
+    return response.data;
+  },
+
   upload: async (file: File): Promise<Scan> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -90,6 +117,16 @@ export const scanAPI = {
 
   deleteScan: async (scanId: number): Promise<void> => {
     await api.delete(`/scan/${scanId}`);
+  },
+
+  cancelScan: async (scanId: number): Promise<Scan> => {
+    const response = await api.post(`/scan/${scanId}/cancel`);
+    return response.data;
+  },
+
+  getScanHosts: async (scanId: number): Promise<ScanHost[]> => {
+    const response = await api.get(`/scan/${scanId}/hosts`);
+    return response.data;
   },
 };
 

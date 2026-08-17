@@ -17,6 +17,14 @@ async def lifespan(app: FastAPI):
     # Startup
     print("Starting Aman V360...")
     
+    # Ensure database tables exist
+    try:
+        import app.models
+        Base.metadata.create_all(bind=engine)
+        print("✓ Database tables verified/created")
+    except Exception as e:
+        print(f"⚠ Database table initialization notice: {e}")
+
     # Initialize AI learning service with feedback integration
     try:
         from app.services.ai_learning_service import ai_learning_service

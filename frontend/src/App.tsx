@@ -3,8 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import ScanUpload from './pages/ScanUpload';
+import NewScan from './pages/NewScan';
 import ScanHistory from './pages/ScanHistory';
+import ScanDetail from './pages/ScanDetail';
 import Vulnerabilities from './pages/Vulnerabilities';
 import Reports from './pages/Reports';
 import AIAssistant from './pages/AIAssistant';
@@ -52,8 +53,12 @@ const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/scan/upload" element={<ScanUpload />} />
+        <Route path="/scan/new" element={<NewScan />} />
+        <Route path="/scan/new/*" element={<NewScan />} />
+        <Route path="/scan/upload" element={<NewScan />} />
+        <Route path="/scan/upload/*" element={<NewScan />} />
         <Route path="/scan/history" element={<ScanHistory />} />
+        <Route path="/scan/:id" element={<ScanDetail />} />
         <Route path="/vulnerabilities" element={<Vulnerabilities />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />

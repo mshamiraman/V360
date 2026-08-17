@@ -7,7 +7,7 @@ import time
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import text, update
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, engine, Base
 from app.models.user import User
 from app.services.auth_service import AuthService
 from app.schemas.auth import UserCreate
@@ -25,14 +25,21 @@ def create_demo_user():
             # Test database connection
             db.execute(text("SELECT 1"))
             break
-        except OperationalError as e:
+        except Exception as e:
             if attempt < max_retries - 1:
-                print(f"Database not ready (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay} seconds...")
+                print(f"Database connection attempt {attempt + 1}/{max_retries} failed: {e}, retrying in {retry_delay} seconds...")
                 time.sleep(retry_delay)
                 continue
             else:
-                print(f"ERROR: Could not connect to database after {max_retries} attempts")
-                sys.exit(1)
+                print(f"WARNING: Database connection retry finished: {e}")
+                db = SessionLocal()
+                break
+
+    try:
+        # Ensure database tables exist
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Notice during table creation: {e}")
     
     auth_service = AuthService(db)
     

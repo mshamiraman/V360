@@ -10,16 +10,19 @@ import {
   Avatar,
   Chip,
   IconButton,
+  Button,
 } from '@mui/material';
 import {
   Security,
   Assessment,
   TrendingUp,
   CloudUpload,
+  Radar,
   InfoOutlined,
   TimelineOutlined,
   MoreHoriz,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { 
   AreaChart, 
   Area, 
@@ -136,6 +139,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [trends, setTrends] = useState<TrendData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -192,7 +196,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box sx={{ py: 1 }}>
-      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <Box sx={{ mb: 5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h3" sx={{ fontWeight: 900, mb: 1, fontFamily: '"Outfit", sans-serif', letterSpacing: '-1.5px' }}>
             Qumarah Intelligence
@@ -202,6 +206,23 @@ const Dashboard: React.FC = () => {
             <Chip label="LIVE" size="small" color="success" sx={{ height: 20, fontSize: '0.6rem', fontWeight: 900, borderRadius: 1 }} />
           </Typography>
         </Box>
+        <Button
+          variant="contained"
+          startIcon={<Radar />}
+          onClick={() => navigate('/scan/new')}
+          sx={{
+            bgcolor: '#6366F1',
+            '&:hover': { bgcolor: '#4F46E5' },
+            borderRadius: '12px',
+            textTransform: 'none',
+            fontWeight: 700,
+            px: 3,
+            py: 1.2,
+            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.35)',
+          }}
+        >
+          New Scan
+        </Button>
       </Box>
 
       {/* Metrics Grid */}

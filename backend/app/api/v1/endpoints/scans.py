@@ -11,11 +11,53 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.services.scan_service import ScanService
 from app.services.auth_service import AuthService
-from app.schemas.scan import ScanResponse, ScanCreate, ScanList
+from app.schemas.scan import ScanResponse, ScanCreate, ScanList, ScanLaunchRequest, ScanHost
 from app.utils.auth import get_current_user
 from app.models.user import User
 
 router = APIRouter()
+
+
+@router.post("/launch", response_model=ScanResponse)
+async def launch_scan(
+    scan_data: ScanLaunchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Launch a live active scan from Nessus scan template configuration"""
+    try:
+        scan_service = ScanService(db)
+        scan = await scan_service.launch_live_scan(
+            user_id=current_user.id,
+            launch_req=scan_data
+        )
+        return scan
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error launching scan: {str(e)}"
+        )
+
+
+@router.post("/save", response_model=ScanResponse)
+async def save_scan(
+    scan_data: ScanLaunchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Save a scan configuration without launching it"""
+    try:
+        scan_service = ScanService(db)
+        scan = scan_service.save_scan(
+            user_id=current_user.id,
+            launch_req=scan_data
+        )
+        return scan
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error saving scan: {str(e)}"
+        )
 
 
 @router.post("/upload", response_model=ScanResponse)
@@ -107,6 +149,62 @@ async def get_scan(
         )
     
     return scan
+
+
+@router.post("/{scan_id}/cancel", response_model=ScanResponse)
+async def cancel_scan(
+    scan_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Cancel a scan that is still processing"""
+    scan_service = ScanService(db)
+    scan = scan_service.get_scan(scan_id)
+
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Scan not found"
+        )
+
+    if scan.user_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to cancel this scan"
+        )
+
+    try:
+        return scan_service.cancel_scan(scan_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.get("/{scan_id}/hosts", response_model=List[ScanHost])
+async def get_scan_hosts(
+    scan_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get the discovered hosts for a scan"""
+    scan_service = ScanService(db)
+    scan = scan_service.get_scan(scan_id)
+
+    if not scan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Scan not found"
+        )
+
+    if scan.user_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this scan"
+        )
+
+    return scan_service.get_scan_hosts(scan)
 
 
 @router.delete("/{scan_id}")

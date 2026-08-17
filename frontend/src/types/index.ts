@@ -13,7 +13,11 @@ export interface Scan {
   user_id: number;
   filename: string;
   original_filename?: string;
-  status: 'processing' | 'completed' | 'failed';
+  template_id?: string;
+  targets?: string;
+  folder?: string;
+  schedule?: string;
+  status: 'created' | 'processing' | 'completed' | 'failed' | 'cancelled';
   upload_time: string;
   processed_at?: string;
   file_size?: number;
@@ -21,6 +25,12 @@ export interface Scan {
   error_message?: string;
   created_at: string;
   target_hosts?: string[];
+}
+
+export interface ScanHost {
+  host: string;
+  fqdn?: string;
+  ports: number[];
 }
 
 export interface ScanInfo {
